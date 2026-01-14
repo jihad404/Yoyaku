@@ -1,0 +1,19 @@
+ # Syncthing
+.stfolder/
+.stignore
+.stversions/
+
+ # Python
+__pycache__/
+*.py[cod]
+venv/
+.env
+
+# IDE
+.vscode/
+.idea/
+# System
+.DS_Store
+Thumbs.db
+# Logs
+*.log
