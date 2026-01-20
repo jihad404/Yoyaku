@@ -15,6 +15,20 @@ def get_user_by_telegram_id(telegram_id):
 
     return user
 
+def get_user_by_id(user_id):
+    """Sucht einen Nutzer anhand seiner User-ID."""
+    connection = get_connection()
+    cursor = connection.cursor()
+
+    cursor.execute(
+        'SELECT * FROM users WHERE id = ?',
+        (user_id,)
+    )
+
+    user = cursor.fetchone()
+    connection.close()
+
+    return user
 
 def create_user(telegram_id, first_name, last_name, birthdate):
     """Erstellt einen neuen Nutzer."""
@@ -65,3 +79,20 @@ def set_admin(telegram_id):
     
     connection.commit()
     connection.close()
+
+
+def get_pending_users():
+    """Holt alle Nutzer die auf Freigabe warten."""
+    connection = get_connection()
+    cursor = connection.cursor()
+
+    cursor.execute(
+        'SELECT * FROM users WHERE is_approved = 0 AND is_admin = 0'
+    )
+
+    users = cursor.fetchall()
+    connection.close()
+
+    return users
+
+

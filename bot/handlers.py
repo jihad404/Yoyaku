@@ -2,7 +2,7 @@ from telegram import Update
 from telegram.ext import ContextTypes
 
 from config import ADMIN_ID
-from database.models import get_user_by_telegram_id, create_user, set_admin
+from database.models import get_user_by_telegram_id, get_user_by_id, create_user, set_admin, get_pending_users, approve_user
 
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
     telegram_id = update.effective_user.id
@@ -117,3 +117,65 @@ async def register(update: Update, context: ContextTypes.DEFAULT_TYPE):
             "Nutze /pending um Anfragen zu verwalten."
         )
     )
+
+
+async def pending(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    telegram_id = update.effective_user.id
+
+    # Nur Admin darf das
+    if telegram_id != ADMIN_ID:
+        return
+
+    # Hole alle wartenden Nutzer
+    users = get_pending_users()
+
+    # Keine Nutzer? Fertig.
+    if not users:
+        await update.message.reply_text("Keine Anfragen.")
+        return
+
+    # Text aufbauen
+    text = "Wartende Nutzer:\n\n"
+
+    for user in users:
+        text += f"Name: {user['first_name']} {user['last_name']}\n"
+        text += f"Geburtsdatum: {user['birthdate']}\n"
+        text += f"Freigeben: /approve_{user['id']}\n"
+        text += "\n"
+
+    # Fertigen Text senden
+    await update.message.reply_text(text)
+
+
+async def approve(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    """Gibt einen Nutzer frei. Nur für Admin."""
+    telegram_id = update.effective_user.id
+
+    # Nur Admin darf das
+    if telegram_id != ADMIN_ID:
+        return
+
+    # ID aus Befehl extrahieren (/approve_5 -> 5)
+    reply = update.message.text.split('_')
+    user_id = int(reply[1])
+
+    # Nutzer in Datenbank freigeben
+    approve_user(user_id)
+
+    # Admin bestätigen
+    await update.message.reply_text(f"Nutzer {user_id} wurde freigegeben.")
+
+    # Nutzer informieren
+    approved_user = get_user_by_id(user_id)
+
+    try:
+        await context.bot.send_message(
+            chat_id=approved_user['telegram_id'],
+            text=(
+                "Hey! Der Admin hat deine Anfrage bestätigt.\n"
+                "Du kannst nun eine Terminsuche starten.\n"
+                "Schreibe /start um anzufangen!"
+            )
+        )
+    except:
+        pass  # Nutzer hat Bot blockiert
