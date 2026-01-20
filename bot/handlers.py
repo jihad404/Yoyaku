@@ -2,7 +2,22 @@ from telegram import Update
 from telegram.ext import ContextTypes
 
 from config import ADMIN_ID
-from database.models import get_user_by_telegram_id, get_user_by_id, create_user, set_admin, get_pending_users, approve_user
+from database.models import (
+    get_user_by_telegram_id, 
+    get_user_by_id, create_user, 
+    set_admin, get_pending_users, 
+    approve_user, 
+    get_active_search,
+    create_search
+    )
+
+  # Verfügbare Terminarten
+SEARCH_TYPES = {
+    1: {
+        "name": "Duisburg - Aufenthaltstitel",
+        "scraper": "duisburg_aufenthalt"
+    }
+}
 
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
     telegram_id = update.effective_user.id
@@ -179,3 +194,80 @@ async def approve(update: Update, context: ContextTypes.DEFAULT_TYPE):
         )
     except:
         pass  # Nutzer hat Bot blockiert
+
+
+async def search(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    """Zeigt verfügbare Terminarten."""
+    telegram_id = update.effective_user.id
+
+    # Nutzer prüfen
+    user = get_user_by_telegram_id(telegram_id)
+
+    if not user or user['is_approved'] == 0:
+        await update.message.reply_text("Du bist nicht freigeschaltet.")
+        return
+      
+    # Prüfe ob schon eine Suche läuft
+    active_search = get_active_search(user['id'])
+ 
+    if active_search:
+        await update.message.reply_text(
+            "Du hast bereits eine aktive Suche.\n"
+            "Nutze /stop um sie zu beenden."
+        )
+        return
+ 
+    # Verfügbare Terminarten anzeigen
+    text = "Verfügbare Terminarten:\n\n"
+ 
+    for type_id, type_info in SEARCH_TYPES.items():
+        text += f"{type_id}. {type_info['name']}\n"
+        text += f"   → /search_{type_id}\n\n"
+
+    await update.message.reply_text(text)
+
+
+async def start_search(update: Update, context: ContextTypes.DEFAULT_TYPE):
+      """Startet eine Terminsuche."""
+      telegram_id = update.effective_user.id
+
+      # Nutzer prüfen
+      user = get_user_by_telegram_id(telegram_id)
+
+      if not user or user['is_approved'] == 0:
+          await update.message.reply_text("Du bist nicht freigeschaltet.")
+          return
+
+      # Prüfe ob schon eine Suche läuft
+      active_search = get_active_search(user['id'])
+
+      if active_search:
+          await update.message.reply_text(
+              "Du hast bereits eine aktive Suche.\n"
+              "Nutze /stop um sie zu beenden."
+          )
+          return
+
+      # ID aus Befehl extrahieren (/search_1 -> 1)
+      reply = update.message.text.split('_')
+      type_id = int(reply[1])
+
+      # Prüfe ob Terminart existiert
+      if type_id not in SEARCH_TYPES:
+          await update.message.reply_text("Ungültige Terminart.")
+          return
+
+      search_type = SEARCH_TYPES[type_id]
+
+      # Suche in Datenbank erstellen
+      search_id = create_search(user['id'], search_type['scraper'])
+
+      await update.message.reply_text(
+          f"🔍 Suche gestartet!\n\n"
+          f"Terminart: {search_type['name']}\n"
+          f"Such-ID: {search_id}\n\n"
+          "Du wirst benachrichtigt sobald ein Termin gefunden wird.\n"
+          "Nutze /stop um die Suche zu beenden."
+      )
+
+      # TODO: Hier später den Scraper starten

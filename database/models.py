@@ -95,4 +95,32 @@ def get_pending_users():
 
     return users
 
+def get_active_search(user_id):
+    """Holt die aktive Suche eines Nutzers."""
+    connection = get_connection()
+    cursor = connection.cursor()
 
+    cursor.execute(
+        'SELECT * FROM searches WHERE user_id = ? AND is_active = 1',
+        (user_id,)
+    )
+
+    search = cursor.fetchone()
+    connection.close()
+
+    return search
+
+def create_search(user_id, search_type):
+    connection = get_connection()
+    cursor = connection.cursor()
+
+    cursor.execute(
+        'INSERT INTO searches (user_id, search_type) VALUES (?, ?)',
+        (user_id, search_type)
+    )
+
+    connection.commit()
+    search_id = cursor.lastrowid # ID der neuen Suche
+    connection.close()
+
+    return search_id
