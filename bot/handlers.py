@@ -15,15 +15,23 @@ from database.models import (
     deactivate_search,
 )
 
+# Behördenkategorien
+SEARCH_CATEGORIES = {
+    1: "Zulassungsbehörde",
+    2: "Ausländerbehörde",
+}
+
 # Verfügbare Terminarten
 SEARCH_TYPES = {
     1: {
-        "name": "Duisburg - Aufenthaltstitel",
-        "scraper": "duisburg_aufenthalt"
+        "name": "Wiederzulassung eines außer Betrieb gesetzten Fahrzeugs",
+        "category": 1,
+        "scraper": "duisburg_zulassung"
     },
     2: {
-        "name": "Duisburg - Wiederzulassung",
-        "scraper": "duisburg_zulassung"
+        "name": "Aufenthaltstitel",
+        "category": 2,
+        "scraper": "duisburg_aufenthalt"
     }
 }
 
@@ -46,10 +54,10 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
             set_admin(telegram_id)
 
         await update.message.reply_text(
-            "Wilkommen Admin!\n\n"
-            "Verfügbare Befehle:\n"
-            "/start - Dieses Menü\n"
-            "/pending - Offene Anfragen"
+            "Willkommen Admin!\n\n"
+            "Befehle:\n"
+            "/pending - Offene Registrierungsanfragen\n"
+            "/start - Dieses Menü"
         )
         return
     
@@ -76,15 +84,34 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
         )
         return
     
-    # Nutzer ist Freigeschaltet
-    await update.message.reply_text(
-        "Wilkommen zurück!\n\n"
-        "Verfügbare Befehle:\n"
-        "/start - Dieses Menü\n"
-        "/search - Neue Terminsuche starten\n"
-        "/status - Aktive Suche anzeigen\n"
-        "/stop - Suche beenden"
-    )
+    # Nutzer ist freigeschaltet
+    active_search = get_active_search(user['id'])
+
+    if active_search:
+        search_name = next(
+            (t["name"] for t in SEARCH_TYPES.values() if t["scraper"] == active_search['search_type']),
+            active_search['search_type']
+        )
+        target = active_search['target_date']
+        target_info = f"\nWunschdatum: {datetime.fromisoformat(target).strftime('%d.%m.%Y')}" if target else ""
+        status_text = (
+            f"Aktive Suche:\n"
+            f"{search_name}{target_info}\n\n"
+            "Befehle:\n"
+            "/status - Verfügbare Termine anzeigen\n"
+            "/search_date - Wunschdatum setzen\n"
+            "/stop - Suche beenden\n"
+            "/start - Dieses Menü"
+        )
+    else:
+        status_text = (
+            "Keine aktive Suche.\n\n"
+            "Befehle:\n"
+            "/search - Neue Terminsuche starten\n"
+            "/start - Dieses Menü"
+        )
+
+    await update.message.reply_text(f"Willkommen zurück!\n\n{status_text}")
 
 async def register(update: Update, context: ContextTypes.DEFAULT_TYPE):
     telegram_id = update.effective_user.id
@@ -225,12 +252,17 @@ async def search(update: Update, context: ContextTypes.DEFAULT_TYPE):
         )
         return
  
-    # Verfügbare Terminarten anzeigen
-    text = "Verfügbare Terminarten:\n\n"
- 
+    # Terminarten nach Kategorie gruppiert anzeigen
+    text = "Terminvereinbarung — Bitte wähle eine Dienstleistung:\n"
+
+    current_category = None
     for type_id, type_info in SEARCH_TYPES.items():
-        text += f"{type_id}. {type_info['name']}\n"
-        text += f"   → /search_{type_id}\n\n"
+        cat_id = type_info["category"]
+        if cat_id != current_category:
+            current_category = cat_id
+            text += f"\n{SEARCH_CATEGORIES[cat_id]}:\n"
+        text += f"  • {type_info['name']}\n"
+        text += f"    → /search_{type_id}\n"
 
     await update.message.reply_text(text)
 
@@ -270,19 +302,16 @@ async def start_search(update: Update, context: ContextTypes.DEFAULT_TYPE):
       # Suche in Datenbank erstellen
       search_id = create_search(user['id'], search_type['scraper'])
 
-      await update.message.reply_text(
-          f"🔍 Suche gestartet!\n\n"
-          f"Terminart: {search_type['name']}\n"
-          f"Such-ID: {search_id}\n\n"
-          "Du wirst benachrichtigt sobald ein Termin gefunden wird.\n"
-          "Nutze /stop um die Suche zu beenden."
-      )
+      category_name = SEARCH_CATEGORIES[search_type['category']]
 
       await update.message.reply_text(
-          "Möchtest du nach einem bestimmten Datum suchen?\n\n"
-          "Sende: /search_date TT.MM.JJJJ\n"
-          "Beispiel: /search_date 15.03.2026\n\n"
-          "Oder nutze /status um alle aktuell freien Termine zu sehen."
+          f"Suche gestartet!\n\n"
+          f"Behörde: {category_name}\n"
+          f"Dienstleistung: {search_type['name']}\n\n"
+          "Nächste Schritte:\n"
+          "/status - Alle freien Termine jetzt anzeigen\n"
+          "/search_date - Nach einem bestimmten Datum suchen\n"
+          "/stop - Suche beenden"
       )
 
 
@@ -335,10 +364,11 @@ async def status(update: Update, context: ContextTypes.DEFAULT_TYPE):
         return
 
     if result["available"]:
-        dates = "\n".join(f"  • {d}" for d in result["available_dates"])
-        await update.message.reply_text(
-            f"Verfügbare Termine:\n\n{dates}"
+        dates = "\n".join(
+            f"  • {datetime.fromisoformat(d).strftime('%d.%m.%Y')}"
+            for d in result["available_dates"]
         )
+        await update.message.reply_text(f"Verfügbare Termine:\n\n{dates}")
     else:
         await update.message.reply_text("Derzeit keine Termine verfügbar.")
 

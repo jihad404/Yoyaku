@@ -13,10 +13,16 @@ async def check_and_notify(context):
     PTB JobQueue-Funktion: Prüft alle aktiven Wunschdatum-Suchen
     und benachrichtigt Nutzer wenn ihr Termin verfügbar ist.
     """
+    from datetime import datetime
+    print(f"[{datetime.now().strftime('%H:%M:%S')}] Checker läuft...")
+
     searches = get_active_date_searches()
 
     if not searches:
+        print("  Keine aktiven Suchen.")
         return
+
+    print(f"  {len(searches)} aktive Suche(n) gefunden.")
 
     for search in searches:
         search_id = search['id']
@@ -51,12 +57,19 @@ async def check_and_notify(context):
 
         # Wunschdatum verfügbar?
         if target_str in result["available_dates"]:
+            from bot.handlers import SEARCH_TYPES, SEARCH_CATEGORIES
+            type_info = next((t for t in SEARCH_TYPES.values() if t["scraper"] == scraper_name), None)
+            service_name = type_info["name"] if type_info else scraper_name
+            category_name = SEARCH_CATEGORIES[type_info["category"]] if type_info else ""
+
             deactivate_search(search_id)
             await context.bot.send_message(
                 chat_id=telegram_id,
                 text=(
                     f"Termin verfügbar!\n\n"
-                    f"Dein Wunschtermin am {target.strftime('%d.%m.%Y')} ist jetzt buchbar.\n\n"
-                    "Schnell buchen: https://www.etermin.net/stadt-duisburg-zul"
+                    f"Behörde: {category_name}\n"
+                    f"Dienstleistung: {service_name}\n"
+                    f"Datum: {target.strftime('%d.%m.%Y')}\n\n"
+                    "Jetzt buchen: https://www.etermin.net/stadt-duisburg-zul"
                 )
             )
