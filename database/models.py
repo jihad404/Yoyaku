@@ -124,3 +124,49 @@ def create_search(user_id, search_type):
     connection.close()
 
     return search_id
+
+
+def set_search_target_date(search_id, target_date):
+    """Setzt das Wunschdatum einer Suche (YYYY-MM-DD)."""
+    connection = get_connection()
+    cursor = connection.cursor()
+
+    cursor.execute(
+        'UPDATE searches SET target_date = ? WHERE id = ?',
+        (target_date, search_id)
+    )
+
+    connection.commit()
+    connection.close()
+
+
+def deactivate_search(search_id):
+    """Deaktiviert eine Suche."""
+    connection = get_connection()
+    cursor = connection.cursor()
+
+    cursor.execute(
+        'UPDATE searches SET is_active = 0 WHERE id = ?',
+        (search_id,)
+    )
+
+    connection.commit()
+    connection.close()
+
+
+def get_active_date_searches():
+    """Gibt alle aktiven Suchen mit gesetztem Wunschdatum zurück (inkl. Nutzerdaten)."""
+    connection = get_connection()
+    cursor = connection.cursor()
+
+    cursor.execute('''
+        SELECT s.*, u.telegram_id
+        FROM searches s
+        JOIN users u ON s.user_id = u.id
+        WHERE s.is_active = 1 AND s.target_date IS NOT NULL
+    ''')
+
+    searches = cursor.fetchall()
+    connection.close()
+
+    return searches

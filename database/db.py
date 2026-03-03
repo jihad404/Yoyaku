@@ -32,11 +32,18 @@ def init_db():
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             user_id INTEGER NOT NULL,
             search_type TEXT NOT NULL,
+            target_date TEXT,
             is_active INTEGER DEFAULT 1,
             created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
             FOREIGN KEY (user_id) REFERENCES users (id)
         )
     ''')
+
+    # Migration: target_date nachrüsten falls Tabelle schon existiert
+    try:
+        cursor.execute('ALTER TABLE searches ADD COLUMN target_date TEXT')
+    except Exception:
+        pass
     
     # Error Logs Tabelle
     cursor.execute('''

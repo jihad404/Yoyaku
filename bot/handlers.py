@@ -1,21 +1,29 @@
+import asyncio
+from datetime import date, datetime
 from telegram import Update
 from telegram.ext import ContextTypes
 
 from config import ADMIN_ID
 from database.models import (
-    get_user_by_telegram_id, 
-    get_user_by_id, create_user, 
-    set_admin, get_pending_users, 
-    approve_user, 
+    get_user_by_telegram_id,
+    get_user_by_id, create_user,
+    set_admin, get_pending_users,
+    approve_user,
     get_active_search,
-    create_search
-    )
+    create_search,
+    set_search_target_date,
+    deactivate_search,
+)
 
-  # Verfügbare Terminarten
+# Verfügbare Terminarten
 SEARCH_TYPES = {
     1: {
         "name": "Duisburg - Aufenthaltstitel",
         "scraper": "duisburg_aufenthalt"
+    },
+    2: {
+        "name": "Duisburg - Wiederzulassung",
+        "scraper": "duisburg_zulassung"
     }
 }
 
@@ -270,4 +278,126 @@ async def start_search(update: Update, context: ContextTypes.DEFAULT_TYPE):
           "Nutze /stop um die Suche zu beenden."
       )
 
-      # TODO: Hier später den Scraper starten
+      await update.message.reply_text(
+          "Möchtest du nach einem bestimmten Datum suchen?\n\n"
+          "Sende: /search_date TT.MM.JJJJ\n"
+          "Beispiel: /search_date 15.03.2026\n\n"
+          "Oder nutze /status um alle aktuell freien Termine zu sehen."
+      )
+
+
+async def stop(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    """Beendet die aktive Suche des Nutzers."""
+    telegram_id = update.effective_user.id
+    user = get_user_by_telegram_id(telegram_id)
+
+    if not user or user['is_approved'] == 0:
+        await update.message.reply_text("Du bist nicht freigeschaltet.")
+        return
+
+    active_search = get_active_search(user['id'])
+
+    if not active_search:
+        await update.message.reply_text("Du hast keine aktive Suche.")
+        return
+
+    deactivate_search(active_search['id'])
+    await update.message.reply_text("Suche beendet.")
+
+
+async def status(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    """Zeigt alle aktuell verfügbaren Termine (ruft Scraper auf)."""
+    telegram_id = update.effective_user.id
+    user = get_user_by_telegram_id(telegram_id)
+
+    if not user or user['is_approved'] == 0:
+        await update.message.reply_text("Du bist nicht freigeschaltet.")
+        return
+
+    active_search = get_active_search(user['id'])
+
+    if not active_search:
+        await update.message.reply_text(
+            "Du hast keine aktive Suche.\n"
+            "Starte zuerst eine Suche mit /search."
+        )
+        return
+
+    await update.message.reply_text("Suche läuft... einen Moment bitte.")
+
+    try:
+        scraper_name = active_search['search_type']
+        result = await asyncio.get_event_loop().run_in_executor(
+            None, _run_scraper, scraper_name
+        )
+    except Exception as e:
+        await update.message.reply_text(f"Fehler beim Abrufen der Termine: {e}")
+        return
+
+    if result["available"]:
+        dates = "\n".join(f"  • {d}" for d in result["available_dates"])
+        await update.message.reply_text(
+            f"Verfügbare Termine:\n\n{dates}"
+        )
+    else:
+        await update.message.reply_text("Derzeit keine Termine verfügbar.")
+
+
+async def search_date(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    """Setzt ein Wunschdatum für die aktive Suche."""
+    telegram_id = update.effective_user.id
+    user = get_user_by_telegram_id(telegram_id)
+
+    if not user or user['is_approved'] == 0:
+        await update.message.reply_text("Du bist nicht freigeschaltet.")
+        return
+
+    active_search = get_active_search(user['id'])
+
+    if not active_search:
+        await update.message.reply_text(
+            "Du hast keine aktive Suche.\n"
+            "Starte zuerst eine Suche mit /search."
+        )
+        return
+
+    if not context.args:
+        await update.message.reply_text(
+            "Bitte gib ein Datum an:\n"
+            "/search_date TT.MM.JJJJ\n\n"
+            "Beispiel: /search_date 15.03.2026"
+        )
+        return
+
+    try:
+        target = datetime.strptime(context.args[0], "%d.%m.%Y").date()
+    except ValueError:
+        await update.message.reply_text(
+            "Ungültiges Datum. Bitte im Format TT.MM.JJJJ angeben.\n"
+            "Beispiel: /search_date 15.03.2026"
+        )
+        return
+
+    if target < date.today():
+        await update.message.reply_text(
+            "Dieses Datum liegt in der Vergangenheit. "
+            "Bitte wähle ein zukünftiges Datum."
+        )
+        return
+
+    set_search_target_date(active_search['id'], target.isoformat())
+
+    await update.message.reply_text(
+        f"Wunschdatum gesetzt: {target.strftime('%d.%m.%Y')}\n\n"
+        "Du wirst benachrichtigt sobald dieser Termin verfügbar ist.\n"
+        "Nutze /stop um die Suche zu beenden."
+    )
+
+
+def _run_scraper(scraper_name: str) -> dict:
+    """Führt den passenden Scraper aus (synchron, für run_in_executor)."""
+    if scraper_name == "duisburg_zulassung":
+        from scrapers.duisburg_zulassung import check_availability
+        return check_availability(months_ahead=2)
+    # Weitere Scraper hier ergänzen
+    return {"available": False, "available_dates": []}
