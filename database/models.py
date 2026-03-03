@@ -110,17 +110,17 @@ def get_active_search(user_id):
 
     return search
 
-def create_search(user_id, search_type):
+def create_search(user_id, search_type, target_date=None):
     connection = get_connection()
     cursor = connection.cursor()
 
     cursor.execute(
-        'INSERT INTO searches (user_id, search_type) VALUES (?, ?)',
-        (user_id, search_type)
+        'INSERT INTO searches (user_id, search_type, target_date) VALUES (?, ?, ?)',
+        (user_id, search_type, target_date)
     )
 
     connection.commit()
-    search_id = cursor.lastrowid # ID der neuen Suche
+    search_id = cursor.lastrowid
     connection.close()
 
     return search_id

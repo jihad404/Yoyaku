@@ -3,7 +3,7 @@ import json
 from datetime import date, datetime
 
 from database.models import get_all_active_searches, deactivate_search, update_last_known_dates
-from bot.handlers import _run_scraper, SEARCH_TYPES, SEARCH_CATEGORIES
+from bot.handlers import _run_scraper, SEARCH_CATEGORIES
 
 # Intervall in Sekunden (alle 5 Minuten prüfen)
 CHECK_INTERVAL = 300
@@ -36,9 +36,9 @@ async def check_and_notify(context):
         target_str = search['target_date']
 
         # Metadaten für Benachrichtigungen
-        type_info = next((t for t in SEARCH_TYPES.values() if t["scraper"] == scraper_name), None)
-        service_name = type_info["name"] if type_info else scraper_name
-        category_name = SEARCH_CATEGORIES[type_info["category"]] if type_info else ""
+        type_info = next((c for c in SEARCH_CATEGORIES.values() if c["scraper"] == scraper_name), None)
+        service_name = type_info["service_name"] if type_info else scraper_name
+        category_name = type_info["name"] if type_info else ""
 
         # Wunschdatum in der Vergangenheit → Suche beenden
         if target_str:
@@ -120,7 +120,8 @@ async def _notify_target_date(context, telegram_id, target_str,
                 f"Behörde: {category_name}\n"
                 f"Dienstleistung: {service_name}\n"
                 f"Datum: {_format_date(target_str)}\n\n"
-                "Jetzt buchen: https://www.etermin.net/stadt-duisburg-zul"
+                "Jetzt buchen: https://www.etermin.net/stadt-duisburg-zul\n\n"
+                "Die Suche läuft weiter und meldet erneut falls sich etwas ändert."
             )
         )
     elif target_str in removed_dates:
