@@ -154,8 +154,8 @@ def deactivate_search(search_id):
     connection.close()
 
 
-def get_active_date_searches():
-    """Gibt alle aktiven Suchen mit gesetztem Wunschdatum zurück (inkl. Nutzerdaten)."""
+def get_all_active_searches():
+    """Gibt alle aktiven Suchen zurück (inkl. Nutzerdaten)."""
     connection = get_connection()
     cursor = connection.cursor()
 
@@ -163,10 +163,25 @@ def get_active_date_searches():
         SELECT s.*, u.telegram_id
         FROM searches s
         JOIN users u ON s.user_id = u.id
-        WHERE s.is_active = 1 AND s.target_date IS NOT NULL
+        WHERE s.is_active = 1
     ''')
 
     searches = cursor.fetchall()
     connection.close()
 
     return searches
+
+
+def update_last_known_dates(search_id, dates: list):
+    """Speichert die zuletzt bekannten verfügbaren Termine als JSON."""
+    import json
+    connection = get_connection()
+    cursor = connection.cursor()
+
+    cursor.execute(
+        'UPDATE searches SET last_known_dates = ? WHERE id = ?',
+        (json.dumps(dates), search_id)
+    )
+
+    connection.commit()
+    connection.close()

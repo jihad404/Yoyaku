@@ -39,9 +39,13 @@ def init_db():
         )
     ''')
 
-    # Migration: target_date nachrüsten falls Tabelle schon existiert
+    # Migrationen: Spalten nachrüsten falls Tabelle schon existiert
     try:
         cursor.execute('ALTER TABLE searches ADD COLUMN target_date TEXT')
+    except Exception:
+        pass
+    try:
+        cursor.execute('ALTER TABLE searches ADD COLUMN last_known_dates TEXT')
     except Exception:
         pass
     
