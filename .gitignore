@@ -1,20 +1,27 @@
- # Syncthing
+# Syncthing
 .stfolder/
 .stignore
 .stversions/
 
- # Python
+# Python
 __pycache__/
 *.py[cod]
 venv/
 .venv/
 .env
 
+# Laufzeitdaten (enthalten personenbezogene Daten)
+yoyaku.db
+bot_state.pickle
+
 # IDE
 .vscode/
 .idea/
+
 # System
 .DS_Store
 Thumbs.db
+
 # Logs
 *.log
+logs/
