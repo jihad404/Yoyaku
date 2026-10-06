@@ -1,76 +1,48 @@
-import asyncio
-from datetime import date, datetime, timedelta
+"""Start, Registrierung und Admin-Freigabe. Die Terminsuche liegt in
+bot/search_flow.py, /status und /stop in bot/searches.py."""
+from datetime import date, datetime
+
 from telegram import Update
 from telegram.ext import ContextTypes
 
 from config import ADMIN_ID
 from database.models import (
-    get_user_by_telegram_id,
-    get_user_by_id, create_user,
-    set_admin, get_pending_users,
+    MAX_ACTIVE_SEARCHES,
     approve_user,
-    get_active_search,
-    create_search,
-    deactivate_search,
-    log_error,
+    create_user,
+    get_active_searches,
+    get_pending_users,
+    get_user_by_id,
+    get_user_by_telegram_id,
+    set_admin,
 )
-from scrapers.registry import enabled_categories, category_for_scraper, fetch_availability
 
+HELP_SEARCH = (
+    "So geht's:\n"
+    "/search – Termin suchen (Thema wählen)\n"
+    "…oder einfach ein Stichwort schicken, z. B. „Reisepass“\n"
+    "/status – Deine Suchen und freie Termine\n"
+    "/stop – Suche beenden\n\n"
+    "/start – Dieses Menü"
+)
 
-# ---------------------------------------------------------------------------
-# Hilfsfunktionen
-# ---------------------------------------------------------------------------
-
-def _is_approved(user) -> bool:
-    return user and user['is_approved'] == 1
-
-
-def _active_search_info(search) -> str:
-    """Gibt eine kurze Beschreibung der aktiven Suche zurück."""
-    cat = category_for_scraper(search['search_type'])
-    name = cat["service_name"] if cat else search['search_type']
-    target = search['target_date']
-    target_info = f"\nWunschdatum: {datetime.fromisoformat(target).strftime('%d.%m.%Y')}" if target else ""
-    return f"{name}{target_info}"
-
-
-def _example_date() -> str:
-    """Beispieldatum in zwei Wochen, damit es nie in der Vergangenheit liegt."""
-    return (date.today() + timedelta(days=14)).strftime('%d.%m.%Y')
-
-
-# ---------------------------------------------------------------------------
-# Handlers
-# ---------------------------------------------------------------------------
 
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
     telegram_id = update.effective_user.id
 
     # Admin-Erstellung beim ersten Start
-    if telegram_id == ADMIN_ID:
-        user = get_user_by_telegram_id(telegram_id)
-        if not user:
-            create_user(telegram_id=telegram_id, first_name="Admin",
-                        last_name="Admin", birthdate="0000-00-00")
-            set_admin(telegram_id)
-
-        await update.message.reply_text(
-            "Willkommen Admin!\n\n"
-            "Admin-Befehle:\n"
-            "/pending - Offene Registrierungsanfragen\n\n"
-            "Suche:\n"
-            "/search - Neue Terminsuche starten\n"
-            "/status - Verfügbare Termine anzeigen\n"
-            "/stop - Suche beenden\n\n"
-            "/start - Dieses Menü"
-        )
-        return
+    if telegram_id == ADMIN_ID and not get_user_by_telegram_id(telegram_id):
+        create_user(telegram_id=telegram_id, first_name="Admin",
+                    last_name="Admin", birthdate="0000-00-00")
+        set_admin(telegram_id)
 
     user = get_user_by_telegram_id(telegram_id)
 
     if not user:
         await update.message.reply_text(
             "Willkommen bei Yoyaku!\n\n"
+            "Ich melde dir freie Termine bei der Stadt Duisburg – Bürgerservice, "
+            "Führerschein, Zulassung und Gewerbe.\n\n"
             "Du bist noch nicht registriert.\n"
             "Registriere dich mit:\n\n"
             "/register Vorname Nachname Geburtsdatum\n\n"
@@ -79,33 +51,19 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
         )
         return
 
-    if not _is_approved(user):
+    if user['is_approved'] != 1:
         await update.message.reply_text(
             "Deine Registrierung wird noch geprüft.\n"
             "Bitte warte auf die Freigabe durch einen Admin."
         )
         return
 
-    active_search = get_active_search(user['id'])
+    count = len(get_active_searches(user['id']))
+    greeting = "Willkommen Admin!" if telegram_id == ADMIN_ID else "Willkommen zurück!"
+    searches_info = f"Aktive Suchen: {count}/{MAX_ACTIVE_SEARCHES}" if count else "Keine aktive Suche."
+    admin_info = "Admin: /pending – Offene Registrierungsanfragen\n\n" if telegram_id == ADMIN_ID else ""
 
-    if active_search:
-        info = _active_search_info(active_search)
-        await update.message.reply_text(
-            f"Willkommen zurück!\n\n"
-            f"Aktive Suche:\n{info}\n\n"
-            "Befehle:\n"
-            "/status - Verfügbare Termine anzeigen\n"
-            "/stop - Suche beenden\n\n"
-            "/start - Dieses Menü"
-        )
-    else:
-        await update.message.reply_text(
-            "Willkommen zurück!\n\n"
-            "Keine aktive Suche.\n\n"
-            "Befehle:\n"
-            "/search - Neue Terminsuche starten\n\n"
-            "/start - Dieses Menü"
-        )
+    await update.message.reply_text(f"{greeting}\n\n{searches_info}\n\n{admin_info}{HELP_SEARCH}")
 
 
 async def register(update: Update, context: ContextTypes.DEFAULT_TYPE):
@@ -207,233 +165,9 @@ async def approve(update: Update, context: ContextTypes.DEFAULT_TYPE):
             chat_id=approved_user['telegram_id'],
             text=(
                 "Deine Registrierung wurde bestätigt!\n"
-                "Starte eine Terminsuche mit /search."
+                "Starte eine Terminsuche mit /search – oder schick mir einfach ein Stichwort, "
+                "z. B. „Personalausweis“."
             )
         )
     except Exception:
         pass
-
-
-async def search(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    """Zeigt die verfügbaren Behörden-Kategorien."""
-    telegram_id = update.effective_user.id
-    user = get_user_by_telegram_id(telegram_id)
-
-    if not _is_approved(user):
-        await update.message.reply_text("Du bist nicht freigeschaltet.")
-        return
-
-    if get_active_search(user['id']):
-        await update.message.reply_text(
-            "Du hast bereits eine aktive Suche.\n"
-            "Nutze /stop um sie zuerst zu beenden."
-        )
-        return
-
-    text = "Wähle eine Behörde:\n\n"
-    for cat_id, cat in enabled_categories().items():
-        text += f"{cat_id} - {cat['name']}\n"
-        text += f"   {cat['service_name']}\n"
-        text += f"   → /search_{cat_id}\n\n"
-
-    await update.message.reply_text(text)
-
-
-async def select_category(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    """Nutzer hat eine Kategorie gewählt → nach Datumspräferenz fragen."""
-    telegram_id = update.effective_user.id
-    user = get_user_by_telegram_id(telegram_id)
-
-    if not _is_approved(user):
-        await update.message.reply_text("Du bist nicht freigeschaltet.")
-        return
-
-    if get_active_search(user['id']):
-        await update.message.reply_text(
-            "Du hast bereits eine aktive Suche.\n"
-            "Nutze /stop um sie zuerst zu beenden."
-        )
-        return
-
-    cat_id = int(update.message.text.split('_')[1])
-
-    categories = enabled_categories()
-    if cat_id not in categories:
-        await update.message.reply_text("Ungültige Auswahl.")
-        return
-
-    cat = categories[cat_id]
-
-    # Kategorie im User-State merken, bis Datumspräferenz beantwortet
-    context.user_data['pending_cat_id'] = cat_id
-
-    await update.message.reply_text(
-        f"Behörde: {cat['name']}\n"
-        f"Dienstleistung: {cat['service_name']}\n\n"
-        "Suchst du einen bestimmten Termin oder soll ich alle verfügbaren Termine melden?\n\n"
-        "/search_any - Alle verfügbaren Termine melden\n"
-        "/search_date TT.MM.JJJJ - Bestimmten Termin suchen\n\n"
-        f"Beispiel: /search_date {_example_date()}"
-    )
-
-
-async def search_any(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    """Startet eine Suche ohne Wunschdatum — meldet alle Terminänderungen."""
-    telegram_id = update.effective_user.id
-    user = get_user_by_telegram_id(telegram_id)
-
-    if not _is_approved(user):
-        await update.message.reply_text("Du bist nicht freigeschaltet.")
-        return
-
-    cat_id = context.user_data.get('pending_cat_id')
-    if cat_id not in enabled_categories():
-        await update.message.reply_text(
-            "Bitte wähle zuerst eine Behörde mit /search."
-        )
-        return
-
-    if get_active_search(user['id']):
-        await update.message.reply_text(
-            "Du hast bereits eine aktive Suche.\n"
-            "Nutze /stop um sie zuerst zu beenden."
-        )
-        return
-
-    cat = enabled_categories()[cat_id]
-    create_search(user['id'], cat['scraper'])
-    context.user_data.pop('pending_cat_id', None)
-
-    await update.message.reply_text(
-        f"Suche gestartet!\n\n"
-        f"Behörde: {cat['name']}\n"
-        f"Dienstleistung: {cat['service_name']}\n\n"
-        "Du wirst benachrichtigt sobald sich Termine ändern.\n\n"
-        "Befehle:\n"
-        "/status - Verfügbare Termine jetzt anzeigen\n"
-        "/stop - Suche beenden"
-    )
-
-
-async def search_date(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    """Startet eine Suche mit Wunschdatum."""
-    telegram_id = update.effective_user.id
-    user = get_user_by_telegram_id(telegram_id)
-
-    if not _is_approved(user):
-        await update.message.reply_text("Du bist nicht freigeschaltet.")
-        return
-
-    cat_id = context.user_data.get('pending_cat_id')
-    if cat_id not in enabled_categories():
-        await update.message.reply_text(
-            "Bitte wähle zuerst eine Behörde mit /search."
-        )
-        return
-
-    if get_active_search(user['id']):
-        await update.message.reply_text(
-            "Du hast bereits eine aktive Suche.\n"
-            "Nutze /stop um sie zuerst zu beenden."
-        )
-        return
-
-    if not context.args:
-        await update.message.reply_text(
-            "Bitte gib ein Datum an:\n"
-            "/search_date TT.MM.JJJJ\n\n"
-            f"Beispiel: /search_date {_example_date()}"
-        )
-        return
-
-    try:
-        target = datetime.strptime(context.args[0], "%d.%m.%Y").date()
-    except ValueError:
-        await update.message.reply_text(
-            "Ungültiges Datum. Bitte im Format TT.MM.JJJJ angeben.\n"
-            f"Beispiel: /search_date {_example_date()}"
-        )
-        return
-
-    if target < date.today():
-        await update.message.reply_text(
-            "Dieses Datum liegt in der Vergangenheit.\n"
-            "Bitte wähle ein zukünftiges Datum."
-        )
-        return
-
-    cat = enabled_categories()[cat_id]
-    create_search(user['id'], cat['scraper'], target_date=target.isoformat())
-    context.user_data.pop('pending_cat_id', None)
-
-    await update.message.reply_text(
-        f"Suche gestartet!\n\n"
-        f"Behörde: {cat['name']}\n"
-        f"Dienstleistung: {cat['service_name']}\n"
-        f"Wunschdatum: {target.strftime('%d.%m.%Y')}\n\n"
-        "Du wirst benachrichtigt sobald dieser Termin verfügbar oder nicht mehr verfügbar ist.\n\n"
-        "Befehle:\n"
-        "/status - Verfügbare Termine jetzt anzeigen\n"
-        "/stop - Suche beenden"
-    )
-
-
-async def stop(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    telegram_id = update.effective_user.id
-    user = get_user_by_telegram_id(telegram_id)
-
-    if not _is_approved(user):
-        await update.message.reply_text("Du bist nicht freigeschaltet.")
-        return
-
-    active_search = get_active_search(user['id'])
-    if not active_search:
-        await update.message.reply_text("Du hast keine aktive Suche.")
-        return
-
-    deactivate_search(active_search['id'])
-    context.user_data.pop('pending_cat_id', None)
-    await update.message.reply_text(
-        "Suche beendet.\n"
-        "Starte eine neue Suche mit /search."
-    )
-
-
-async def status(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    """Zeigt alle aktuell verfügbaren Termine (ruft Scraper auf)."""
-    telegram_id = update.effective_user.id
-    user = get_user_by_telegram_id(telegram_id)
-
-    if not _is_approved(user):
-        await update.message.reply_text("Du bist nicht freigeschaltet.")
-        return
-
-    active_search = get_active_search(user['id'])
-    if not active_search:
-        await update.message.reply_text(
-            "Du hast keine aktive Suche.\n"
-            "Starte eine mit /search."
-        )
-        return
-
-    await update.message.reply_text("Suche läuft... einen Moment bitte.")
-
-    try:
-        result = await asyncio.to_thread(fetch_availability, active_search['search_type'])
-    except Exception as e:
-        reference = log_error(f"/status ({active_search['search_type']}): {e!r}", user['id'])
-        await update.message.reply_text(
-            "Die Termine konnten gerade nicht abgerufen werden. "
-            "Bitte versuche es später erneut.\n"
-            f"Fehlerreferenz: {reference}"
-        )
-        return
-
-    if result["available"]:
-        dates = "\n".join(
-            f"  • {datetime.fromisoformat(d).strftime('%d.%m.%Y')}"
-            for d in result["available_dates"]
-        )
-        await update.message.reply_text(f"Verfügbare Termine:\n\n{dates}")
-    else:
-        await update.message.reply_text("Derzeit keine Termine verfügbar.")
