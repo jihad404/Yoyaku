@@ -1,0 +1,188 @@
+[
+ {
+  "sgid": 46563,
+  "sg": "Meldeangelegenheiten",
+  "sid": 90492,
+  "s": "Anmeldungen"
+ },
+ {
+  "sgid": 46563,
+  "sg": "Meldeangelegenheiten",
+  "sid": 90493,
+  "s": "Abmeldungen"
+ },
+ {
+  "sgid": 46563,
+  "sg": "Meldeangelegenheiten",
+  "sid": 90494,
+  "s": "Ummeldungen (innerhalb Duisburgs)"
+ },
+ {
+  "sgid": 46563,
+  "sg": "Meldeangelegenheiten",
+  "sid": 94180,
+  "s": "Führungszeugnis"
+ },
+ {
+  "sgid": 46563,
+  "sg": "Meldeangelegenheiten",
+  "sid": 94181,
+  "s": "Bescheinigungen (Meldebescheinigung, Lebensbescheinigung, Aufenthaltsbescheinigungen)"
+ },
+ {
+  "sgid": 46563,
+  "sg": "Meldeangelegenheiten",
+  "sid": 94182,
+  "s": "Melderegisterauskunft (Hausauskünfte)"
+ },
+ {
+  "sgid": 46563,
+  "sg": "Meldeangelegenheiten",
+  "sid": 94183,
+  "s": "Steueridentifikationsnummer (Lohnsteuer ID)"
+ },
+ {
+  "sgid": 46563,
+  "sg": "Meldeangelegenheiten",
+  "sid": 393309,
+  "s": "Änderung des Familienstandes"
+ },
+ {
+  "sgid": 46444,
+  "sg": "Pass- und Ausweiswesen",
+  "sid": 90152,
+  "s": "Personalausweis beantragen"
+ },
+ {
+  "sgid": 46444,
+  "sg": "Pass- und Ausweiswesen",
+  "sid": 90153,
+  "s": "Reisepass beantragen"
+ },
+ {
+  "sgid": 46444,
+  "sg": "Pass- und Ausweiswesen",
+  "sid": 90491,
+  "s": "Ausstellung eines vorläufigen Personalausweises Reisepasses"
+ },
+ {
+  "sgid": 46444,
+  "sg": "Pass- und Ausweiswesen",
+  "sid": 93352,
+  "s": "Abholung von Personalausweisen, Reisepässen oder e ID Ausweiskarten (nur EU-Bürger)"
+ },
+ {
+  "sgid": 46444,
+  "sg": "Pass- und Ausweiswesen",
+  "sid": 194814,
+  "s": "e ID Ausweiskarte (nur EU-Bürger) beantragen"
+ },
+ {
+  "sgid": 46444,
+  "sg": "Pass- und Ausweiswesen",
+  "sid": 194823,
+  "s": "Aktivierung PIN Personalausweis"
+ },
+ {
+  "sgid": 46564,
+  "sg": "KFZ- /Führerscheinangelegenheiten",
+  "sid": 90495,
+  "s": "Adressen- und Namensänderungen KfZ-Schein (ZB I)"
+ },
+ {
+  "sgid": 46564,
+  "sg": "KFZ- /Führerscheinangelegenheiten",
+  "sid": 90496,
+  "s": "Führerscheinanträge (Erstantrag , Erweiterung, Verlängerung, Wiedererteilung)"
+ },
+ {
+  "sgid": 46564,
+  "sg": "KFZ- /Führerscheinangelegenheiten",
+  "sid": 93353,
+  "s": "Führerscheine aushändigen"
+ },
+ {
+  "sgid": 46564,
+  "sg": "KFZ- /Führerscheinangelegenheiten",
+  "sid": 93354,
+  "s": "Führerscheine entgegennehmen"
+ },
+ {
+  "sgid": 46564,
+  "sg": "KFZ- /Führerscheinangelegenheiten",
+  "sid": 93355,
+  "s": "Führerscheinumtausch"
+ },
+ {
+  "sgid": 46564,
+  "sg": "KFZ- /Führerscheinangelegenheiten",
+  "sid": 93356,
+  "s": "Internationale Führerscheine ausstellen"
+ },
+ {
+  "sgid": 46564,
+  "sg": "KFZ- /Führerscheinangelegenheiten",
+  "sid": 93357,
+  "s": "Außerbetriebssetzung eines Fahrzeugs (Kraftfahrzeug vorübergehend abmelden)"
+ },
+ {
+  "sgid": 47606,
+  "sg": "Fundsachenangelegenheiten",
+  "sid": 93366,
+  "s": "Entgegennahme von Fundsachen"
+ },
+ {
+  "sgid": 47606,
+  "sg": "Fundsachenangelegenheiten",
+  "sid": 93367,
+  "s": "Aushändigung von Fundsachen"
+ },
+ {
+  "sgid": 47606,
+  "sg": "Fundsachenangelegenheiten",
+  "sid": 93368,
+  "s": "Auskünfte (mündlich/schriftlich)"
+ },
+ {
+  "sgid": 47608,
+  "sg": "Weitere Dienstleistungen",
+  "sid": 93369,
+  "s": "Beglaubigungen von Kopien oder Unterschriften"
+ },
+ {
+  "sgid": 47608,
+  "sg": "Weitere Dienstleistungen",
+  "sid": 93370,
+  "s": "Fischereischeine"
+ },
+ {
+  "sgid": 47608,
+  "sg": "Weitere Dienstleistungen",
+  "sid": 93371,
+  "s": "\"Mein Ticket\""
+ },
+ {
+  "sgid": 47608,
+  "sg": "Weitere Dienstleistungen",
+  "sid": 93372,
+  "s": "Schwerbehindertenausweise (nur Verlängerung)"
+ },
+ {
+  "sgid": 47608,
+  "sg": "Weitere Dienstleistungen",
+  "sid": 93373,
+  "s": "Verkauf von Abfallsäcken"
+ },
+ {
+  "sgid": 47608,
+  "sg": "Weitere Dienstleistungen",
+  "sid": 93374,
+  "s": "Zahlstelle"
+ },
+ {
+  "sgid": 47608,
+  "sg": "Weitere Dienstleistungen",
+  "sid": 93375,
+  "s": "Untersuchungsberechtigungsscheine"
+ }
+]

@@ -1,0 +1,152 @@
+[
+ {
+  "sgid": 53426,
+  "sg": "Ersatzführerschein (Verlust / Diebstahl)",
+  "sid": 110007,
+  "s": "Ersatz nach  Verlust/Diebstahl"
+ },
+ {
+  "sgid": 53431,
+  "sg": "Ausstellung Internationaler Führerschein",
+  "sid": 110021,
+  "s": "Internationaler Führerschein (im Besitz grauer/rosa FS oder aus anderer Stadt)"
+ },
+ {
+  "sgid": 53431,
+  "sg": "Ausstellung Internationaler Führerschein",
+  "sid": 110022,
+  "s": "Internationaler Führerschein (im Besitz des Kartenführerscheins, ausgestellt in Duisburg)"
+ },
+ {
+  "sgid": 53432,
+  "sg": "Umschreibung ausländischer Fahrerlaubnisse",
+  "sid": 110023,
+  "s": "Umschreibung ausländische Drittstaats-Fahrerlaubnis (Nicht-EU)"
+ },
+ {
+  "sgid": 53432,
+  "sg": "Umschreibung ausländischer Fahrerlaubnisse",
+  "sid": 110025,
+  "s": "Umschreibung ausländische EU-Fahrerlaubnis"
+ },
+ {
+  "sgid": 53427,
+  "sg": "Personenbeförderung, Berufskraftverkehr",
+  "sid": 110008,
+  "s": "Fahrerlaubnis zur Fahrgastbeförderung („Taxischein“)"
+ },
+ {
+  "sgid": 53427,
+  "sg": "Personenbeförderung, Berufskraftverkehr",
+  "sid": 110010,
+  "s": "Fahrerkarte beantragen"
+ },
+ {
+  "sgid": 53427,
+  "sg": "Personenbeförderung, Berufskraftverkehr",
+  "sid": 110018,
+  "s": "Eintragung Schlüsselzahl 95 - FQN (\"Module\" BKrFQG)"
+ },
+ {
+  "sgid": 53427,
+  "sg": "Personenbeförderung, Berufskraftverkehr",
+  "sid": 110019,
+  "s": "Verlängerung Klasse C/CE (beinhaltet auch Fahrerkarte & FQN)"
+ },
+ {
+  "sgid": 53427,
+  "sg": "Personenbeförderung, Berufskraftverkehr",
+  "sid": 110020,
+  "s": "Verlängerung Klasse D/DE  (beinhaltet auch Fahrerkarte & FQN)"
+ },
+ {
+  "sgid": 53433,
+  "sg": "Sonstige Fahrerlaubnisangelegenheiten",
+  "sid": 110033,
+  "s": "Eintragung Schlüsselzahl B96 & B196 & B197"
+ },
+ {
+  "sgid": 53433,
+  "sg": "Sonstige Fahrerlaubnisangelegenheiten",
+  "sid": 110027,
+  "s": "Fahrschulwechsel"
+ },
+ {
+  "sgid": 53433,
+  "sg": "Sonstige Fahrerlaubnisangelegenheiten",
+  "sid": 110028,
+  "s": "Änderung Theorieprüfung (Sprache, Ausweis, o.ä.)"
+ },
+ {
+  "sgid": 53433,
+  "sg": "Sonstige Fahrerlaubnisangelegenheiten",
+  "sid": 110031,
+  "s": "Vorsprache zur laufenden Wiedererteilung"
+ },
+ {
+  "sgid": 53433,
+  "sg": "Sonstige Fahrerlaubnisangelegenheiten",
+  "sid": 110032,
+  "s": "Beratung zum laufenden Führerscheinantrag"
+ },
+ {
+  "sgid": 53433,
+  "sg": "Sonstige Fahrerlaubnisangelegenheiten",
+  "sid": 110030,
+  "s": "Umschreibung von Dienstführerscheinen (BW/Polizei)"
+ },
+ {
+  "sgid": 53433,
+  "sg": "Sonstige Fahrerlaubnisangelegenheiten",
+  "sid": 155245,
+  "s": "Änderung von Auflagen (z.B. Sehhilfe)"
+ },
+ {
+  "sgid": 53434,
+  "sg": "Umtausch Führerschein",
+  "sid": 345805,
+  "s": "Umtausch eines deutschen Führerscheins"
+ },
+ {
+  "sgid": 52956,
+  "sg": "Abholung & Versand von Führerscheinen",
+  "sid": 108401,
+  "s": "Abholung Führerschein"
+ },
+ {
+  "sgid": 52956,
+  "sg": "Abholung & Versand von Führerscheinen",
+  "sid": 131749,
+  "s": "Änderung Wohnanschrift Direktversand"
+ },
+ {
+  "sgid": 53435,
+  "sg": "Fahrerlaubnisbeantragung",
+  "sid": 110036,
+  "s": "Ersterteilung"
+ },
+ {
+  "sgid": 53435,
+  "sg": "Fahrerlaubnisbeantragung",
+  "sid": 110037,
+  "s": "Ersterteilung mit begleitetem Fahren ab 17"
+ },
+ {
+  "sgid": 53435,
+  "sg": "Fahrerlaubnisbeantragung",
+  "sid": 110038,
+  "s": "Erweiterung"
+ },
+ {
+  "sgid": 53435,
+  "sg": "Fahrerlaubnisbeantragung",
+  "sid": 110039,
+  "s": "Neuerteilung (\"Wiedererteilung\")"
+ },
+ {
+  "sgid": 163472,
+  "sg": "Walk-By",
+  "sid": null,
+  "s": ""
+ }
+]

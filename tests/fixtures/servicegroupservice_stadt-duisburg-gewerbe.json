@@ -1,0 +1,44 @@
+[
+ {
+  "sgid": 122164,
+  "sg": "Gewerbemeldestelle",
+  "sid": 349618,
+  "s": "Gewerbeanmeldung"
+ },
+ {
+  "sgid": 122164,
+  "sg": "Gewerbemeldestelle",
+  "sid": 349619,
+  "s": "Gewerbeabmeldung"
+ },
+ {
+  "sgid": 122164,
+  "sg": "Gewerbemeldestelle",
+  "sid": 349620,
+  "s": "Gewerbeummeldung"
+ },
+ {
+  "sgid": 122164,
+  "sg": "Gewerbemeldestelle",
+  "sid": 349621,
+  "s": "Gewerbeauskünfte erteilen (mündlich/schriftlich)/ Ersatzbescheinigungen "
+ },
+ {
+  "sgid": 133183,
+  "sg": "Allgemeine Gewerbeangelegenheiten",
+  "sid": 372904,
+  "s": "Gewerbezentralregisterauszüge"
+ },
+ {
+  "sgid": 133183,
+  "sg": "Allgemeine Gewerbeangelegenheiten",
+  "sid": 372905,
+  "s": "Reisegewerbeangelegenheiten"
+ },
+ {
+  "sgid": 133183,
+  "sg": "Allgemeine Gewerbeangelegenheiten",
+  "sid": 372906,
+  "s": "Maklerangelegenheiten"
+ }
+]

@@ -1,0 +1,212 @@
+[
+ {
+  "sgid": 82034,
+  "sg": "Fahrzeugzulassung",
+  "sid": 217882,
+  "s": "Ausfuhrkennzeichen beantragen"
+ },
+ {
+  "sgid": 82034,
+  "sg": "Fahrzeugzulassung",
+  "sid": 217883,
+  "s": "Kurzzeitkennzeichen beantragen"
+ },
+ {
+  "sgid": 82034,
+  "sg": "Fahrzeugzulassung",
+  "sid": 217884,
+  "s": "Wiederzulassung eines außer Betrieb gesetzten Fahrzeugs"
+ },
+ {
+  "sgid": 82034,
+  "sg": "Fahrzeugzulassung",
+  "sid": 217885,
+  "s": "Zulassung eines Fahrzeugs auf eine(n) Minderjährige(n)"
+ },
+ {
+  "sgid": 82034,
+  "sg": "Fahrzeugzulassung",
+  "sid": 217886,
+  "s": "Zulassung eines importierten Gebraucht - Fahrzeugs aus einem Mitgliedstaat der Europäischen Union"
+ },
+ {
+  "sgid": 82034,
+  "sg": "Fahrzeugzulassung",
+  "sid": 217893,
+  "s": "Zulassung eines importierten Gebraucht-Fahrzeugs aus einem Staat, der nicht zur EU gehört"
+ },
+ {
+  "sgid": 82034,
+  "sg": "Fahrzeugzulassung",
+  "sid": 217894,
+  "s": "Zulassung eines importierten Neu - Fahrzeugs aus einem Staat, der nicht zur EU gehört"
+ },
+ {
+  "sgid": 82034,
+  "sg": "Fahrzeugzulassung",
+  "sid": 217899,
+  "s": "Zulassung eines Neufahrzeugs"
+ },
+ {
+  "sgid": 82034,
+  "sg": "Fahrzeugzulassung",
+  "sid": 220237,
+  "s": "Zulassung eines importierten Neu-Fahrzeugs aus einem Mitgliedstaat der EU"
+ },
+ {
+  "sgid": 84009,
+  "sg": "Änderung der Fahrzeugpapiere",
+  "sid": 217935,
+  "s": "Berichtigung der Zulassungsbescheinigung Teil I (ZB I) bei Wohnortwechsel innerhalb Duisburgs"
+ },
+ {
+  "sgid": 84009,
+  "sg": "Änderung der Fahrzeugpapiere",
+  "sid": 217936,
+  "s": "Berichtigung der Zulassungsbescheinigung Teil I (ZB I) bei Verlegung des Firmensitzes innerhalb Duisburgs"
+ },
+ {
+  "sgid": 84009,
+  "sg": "Änderung der Fahrzeugpapiere",
+  "sid": 217938,
+  "s": "Berichtigung von Fahrzeugschein/Zulassungsbescheinigung Teil I (ZB I) und Fahrzeugbrief/Zulassungsbescheinigung Teil II (ZB II) bei Namensänderung (privat oder Firma)"
+ },
+ {
+  "sgid": 84003,
+  "sg": "Diebstahl/ Verlust",
+  "sid": 217921,
+  "s": "Umkennzeichnung bei Verlust, Diebstahl oder sonstigem Abhandenkommen eines Kennzeichenschildes/mehrerer Kennzeichenschilder"
+ },
+ {
+  "sgid": 84003,
+  "sg": "Diebstahl/ Verlust",
+  "sid": 217922,
+  "s": "Verlust, Diebstahl oder sonstiges Abhandenkommen des Fahrzeugbriefes/der Zulassungsbescheinigung Teil II (ZB II)"
+ },
+ {
+  "sgid": 84003,
+  "sg": "Diebstahl/ Verlust",
+  "sid": 217920,
+  "s": "Diebstahl eines Fahrzeugs - Außerbetriebsetzung"
+ },
+ {
+  "sgid": 84003,
+  "sg": "Diebstahl/ Verlust",
+  "sid": 217931,
+  "s": "Verlust, Diebstahl oder sonstiges Abhandenkommen des Fahrzeugscheins/der Zulassungsbescheinigung Teil I (ZB I)"
+ },
+ {
+  "sgid": 83985,
+  "sg": "Umschreibungen",
+  "sid": 217857,
+  "s": "Umschreibung eines in Duisburg zugelassenen Fahrzeugs"
+ },
+ {
+  "sgid": 83985,
+  "sg": "Umschreibungen",
+  "sid": 217873,
+  "s": "Umschreibung eines nicht in Duisburg zugelassenen Fahrzeugs"
+ },
+ {
+  "sgid": 83985,
+  "sg": "Umschreibungen",
+  "sid": 217940,
+  "s": "Berichtigung der Zulassungsbescheinigung Teil I (ZB I) bei Wohnortwechsel innerhalb Duisburgs"
+ },
+ {
+  "sgid": 83985,
+  "sg": "Umschreibungen",
+  "sid": 217942,
+  "s": "Berichtigung der Zulassungsbescheinigung Teil I (ZB I) bei Verlegung des Firmensitzes innerhalb Duisburgs"
+ },
+ {
+  "sgid": 83985,
+  "sg": "Umschreibungen",
+  "sid": 217943,
+  "s": "Berichtigung von Fahrzeugschein/Zulassungsbescheinigung Teil I (ZB I) und Fahrzeugbrief/Zulassungsbescheinigung Teil II (ZB II) bei Namensänderung (privat oder Firma)"
+ },
+ {
+  "sgid": 83987,
+  "sg": "Kennzeichen",
+  "sid": 217900,
+  "s": "Beschädigtes Kennzeichen"
+ },
+ {
+  "sgid": 83987,
+  "sg": "Kennzeichen",
+  "sid": 217901,
+  "s": "Beschädigtes Stadtsiegel/ HU-Plakette auf einem Kennzeichenschild"
+ },
+ {
+  "sgid": 83987,
+  "sg": "Kennzeichen",
+  "sid": 217902,
+  "s": "Oldtimerkennzeichen beantragen"
+ },
+ {
+  "sgid": 83987,
+  "sg": "Kennzeichen",
+  "sid": 217903,
+  "s": "Saisonkennzeichen beantragen"
+ },
+ {
+  "sgid": 83987,
+  "sg": "Kennzeichen",
+  "sid": 217904,
+  "s": "Umkennzeichnung auf ein Wunschkennzeichen"
+ },
+ {
+  "sgid": 83987,
+  "sg": "Kennzeichen",
+  "sid": 217905,
+  "s": "Umkennzeichnung bei Verlust, Diebstahl oder sonstigem Abhandenkommen eines Kennzeichenschildes/mehrerer Kennzeichenschilder"
+ },
+ {
+  "sgid": 83987,
+  "sg": "Kennzeichen",
+  "sid": 217907,
+  "s": "Zuteilung eines Wechselkennzeichens für zwei Fahrzeuge"
+ },
+ {
+  "sgid": 83987,
+  "sg": "Kennzeichen",
+  "sid": 217908,
+  "s": "Wunschkennzeichen"
+ },
+ {
+  "sgid": 83988,
+  "sg": "Technik",
+  "sid": 217914,
+  "s": "Katalysator nachrüsten"
+ },
+ {
+  "sgid": 83988,
+  "sg": "Technik",
+  "sid": 217916,
+  "s": "Nachrüstung eines umweltfreundlichen Partikelminderungssystems bei Dieselfahrzeugen"
+ },
+ {
+  "sgid": 83988,
+  "sg": "Technik",
+  "sid": 217918,
+  "s": "Nachträgliche Eintragung bei technischen Veränderungen am Fahrzeug"
+ },
+ {
+  "sgid": 83988,
+  "sg": "Technik",
+  "sid": 217919,
+  "s": "Gespanne bis 100km/h"
+ },
+ {
+  "sgid": 83981,
+  "sg": "Abmeldung",
+  "sid": 217855,
+  "s": "Abmeldung / Außerbetriebsetzung"
+ },
+ {
+  "sgid": 95465,
+  "sg": "Leistungsgruppe",
+  "sid": null,
+  "s": ""
+ }
+]

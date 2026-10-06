@@ -1,0 +1,38 @@
+[
+ {
+  "start": "2026-10-14T08:20:00",
+  "end": "2026-10-14T08:30:00",
+  "calendarid": 79518,
+  "calendarname": "Bürger-Service-Station-Meiderich/Beeck",
+  "idandtimeslot": "79518|2026-10-14 08:20|2026-10-14 08:30|Bürger-Service-Station-Meiderich/Beeck|1",
+  "available": 0,
+  "f": true,
+  "wl": 0,
+  "wlstart": 0,
+  "wlend": 0,
+  "ecap": false,
+  "cap": 30,
+  "capmax": 30,
+  "adw": 0,
+  "ads": "",
+  "hv": "7DE3468D25D46A131CD2CE93D75E6CC1C0D421DC6B7997FDD95D7882701707F8"
+ },
+ {
+  "start": "2026-10-14T08:58:00",
+  "end": "2026-10-14T09:08:00",
+  "calendarid": 79518,
+  "calendarname": "Bürger-Service-Station-Meiderich/Beeck",
+  "idandtimeslot": "79518|2026-10-14 08:58|2026-10-14 09:08|Bürger-Service-Station-Meiderich/Beeck|1",
+  "available": 0,
+  "f": true,
+  "wl": 0,
+  "wlstart": 0,
+  "wlend": 0,
+  "ecap": false,
+  "cap": 30,
+  "capmax": 30,
+  "adw": 0,
+  "ads": "",
+  "hv": "C233D4C2BA3C9FB9F9664C9E80514692685FAEC623E8D8CC90BF524275B34877"
+ }
+]
