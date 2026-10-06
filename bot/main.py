@@ -1,4 +1,6 @@
-from telegram.ext import Application, CommandHandler, MessageHandler, filters
+import os
+
+from telegram.ext import Application, CommandHandler, MessageHandler, PicklePersistence, filters
 
 from config import BOT_TOKEN
 from bot.handlers import (
@@ -10,7 +12,11 @@ from manager.checker import check_and_notify, CHECK_INTERVAL
 
 
 def main():
-    app = Application.builder().token(BOT_TOKEN).build()
+    # Persistenz, damit z. B. die gewählte Kategorie einen Neustart übersteht
+    persistence = PicklePersistence(
+        filepath=os.path.join(os.path.dirname(__file__), '..', 'bot_state.pickle')
+    )
+    app = Application.builder().token(BOT_TOKEN).persistence(persistence).build()
 
     app.add_handler(CommandHandler("start", start))
     app.add_handler(CommandHandler("register", register))

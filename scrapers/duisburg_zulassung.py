@@ -1,3 +1,4 @@
+import os
 import time
 from datetime import date
 from selenium import webdriver
@@ -12,20 +13,27 @@ URL = "https://www.etermin.net/stadt-duisburg-zul"
 # jQuery UI datepicker: selectable days carry class "dayA" and data-handler="selectDay"
 AVAILABLE_DAY_SELECTOR = "td.dayA[data-handler='selectDay']"
 
-# Path to chromedriver — on Raspberry Pi (apt install chromium-driver) this is the default
-CHROMEDRIVER_PATH = "/usr/bin/chromedriver"
+# Defaults match Raspberry Pi (apt install chromium chromium-driver). Override via
+# CHROMIUM_BINARY / CHROMEDRIVER_PATH; if the paths don't exist, Selenium Manager
+# locates a local Chrome + driver itself (e.g. on Windows).
+CHROMIUM_BINARY = os.getenv("CHROMIUM_BINARY", "/usr/bin/chromium")
+CHROMEDRIVER_PATH = os.getenv("CHROMEDRIVER_PATH", "/usr/bin/chromedriver")
 
 
 def _build_driver(headless: bool = True) -> webdriver.Chrome:
     opts = Options()
-    opts.binary_location = "/usr/bin/chromium"
+    if os.path.exists(CHROMIUM_BINARY):
+        opts.binary_location = CHROMIUM_BINARY
     if headless:
         opts.add_argument("--headless=new")
     opts.add_argument("--no-sandbox")
     opts.add_argument("--disable-dev-shm-usage")
     opts.add_argument("--disable-gpu")
     opts.add_argument("--window-size=1920,1080")
-    service = Service(executable_path=CHROMEDRIVER_PATH)
+    if os.path.exists(CHROMEDRIVER_PATH):
+        service = Service(executable_path=CHROMEDRIVER_PATH)
+    else:
+        service = Service()
     return webdriver.Chrome(service=service, options=opts)
 
 

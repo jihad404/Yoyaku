@@ -1,3 +1,6 @@
+import json
+import uuid
+
 from database.db import get_connection
 
 def get_user_by_telegram_id(telegram_id):
@@ -126,20 +129,6 @@ def create_search(user_id, search_type, target_date=None):
     return search_id
 
 
-def set_search_target_date(search_id, target_date):
-    """Setzt das Wunschdatum einer Suche (YYYY-MM-DD)."""
-    connection = get_connection()
-    cursor = connection.cursor()
-
-    cursor.execute(
-        'UPDATE searches SET target_date = ? WHERE id = ?',
-        (target_date, search_id)
-    )
-
-    connection.commit()
-    connection.close()
-
-
 def deactivate_search(search_id):
     """Deaktiviert eine Suche."""
     connection = get_connection()
@@ -174,7 +163,6 @@ def get_all_active_searches():
 
 def update_last_known_dates(search_id, dates: list):
     """Speichert die zuletzt bekannten verfügbaren Termine als JSON."""
-    import json
     connection = get_connection()
     cursor = connection.cursor()
 
@@ -185,3 +173,20 @@ def update_last_known_dates(search_id, dates: list):
 
     connection.commit()
     connection.close()
+
+
+def log_error(error_message, user_id=None):
+    """Speichert einen Fehler und gibt eine kurze Referenz für den Nutzer zurück."""
+    reference = uuid.uuid4().hex[:8].upper()
+    connection = get_connection()
+    cursor = connection.cursor()
+
+    cursor.execute(
+        'INSERT INTO error_logs (reference, user_id, error_message) VALUES (?, ?, ?)',
+        (reference, user_id, error_message)
+    )
+
+    connection.commit()
+    connection.close()
+
+    return reference

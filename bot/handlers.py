@@ -1,5 +1,5 @@
 import asyncio
-from datetime import date, datetime
+from datetime import date, datetime, timedelta
 from telegram import Update
 from telegram.ext import ContextTypes
 
@@ -11,23 +11,10 @@ from database.models import (
     approve_user,
     get_active_search,
     create_search,
-    set_search_target_date,
     deactivate_search,
+    log_error,
 )
-
-# Jede Kategorie = eine Behörde mit einer oder mehreren Dienstleistungen
-SEARCH_CATEGORIES = {
-    1: {
-        "name": "Zulassungsbehörde",
-        "service_name": "Wiederzulassung eines außer Betrieb gesetzten Fahrzeugs",
-        "scraper": "duisburg_zulassung"
-    },
-    2: {
-        "name": "Ausländerbehörde",
-        "service_name": "Aufenthaltstitel",
-        "scraper": "duisburg_aufenthalt"
-    }
-}
+from scrapers.registry import enabled_categories, category_for_scraper, fetch_availability
 
 
 # ---------------------------------------------------------------------------
@@ -40,19 +27,16 @@ def _is_approved(user) -> bool:
 
 def _active_search_info(search) -> str:
     """Gibt eine kurze Beschreibung der aktiven Suche zurück."""
-    cat = next((c for c in SEARCH_CATEGORIES.values() if c["scraper"] == search['search_type']), None)
+    cat = category_for_scraper(search['search_type'])
     name = cat["service_name"] if cat else search['search_type']
     target = search['target_date']
     target_info = f"\nWunschdatum: {datetime.fromisoformat(target).strftime('%d.%m.%Y')}" if target else ""
     return f"{name}{target_info}"
 
 
-def _run_scraper(scraper_name: str) -> dict:
-    """Führt den passenden Scraper aus (synchron, für run_in_executor)."""
-    if scraper_name == "duisburg_zulassung":
-        from scrapers.duisburg_zulassung import check_availability
-        return check_availability(months_ahead=2)
-    return {"available": False, "available_dates": []}
+def _example_date() -> str:
+    """Beispieldatum in zwei Wochen, damit es nie in der Vergangenheit liegt."""
+    return (date.today() + timedelta(days=14)).strftime('%d.%m.%Y')
 
 
 # ---------------------------------------------------------------------------
@@ -77,7 +61,6 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
             "Suche:\n"
             "/search - Neue Terminsuche starten\n"
             "/status - Verfügbare Termine anzeigen\n"
-            "/search_date - Wunschdatum setzen\n"
             "/stop - Suche beenden\n\n"
             "/start - Dieses Menü"
         )
@@ -112,7 +95,6 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
             f"Aktive Suche:\n{info}\n\n"
             "Befehle:\n"
             "/status - Verfügbare Termine anzeigen\n"
-            "/search_date - Wunschdatum setzen\n"
             "/stop - Suche beenden\n\n"
             "/start - Dieses Menü"
         )
@@ -144,8 +126,22 @@ async def register(update: Update, context: ContextTypes.DEFAULT_TYPE):
         return
 
     first_name = context.args[0]
-    last_name = context.args[1]
-    birthdate = context.args[2]
+    last_name = " ".join(context.args[1:-1])
+    birthdate = context.args[-1]
+
+    try:
+        parsed_birthdate = datetime.strptime(birthdate, "%d.%m.%Y").date()
+    except ValueError:
+        await update.message.reply_text(
+            "Ungültiges Geburtsdatum. Bitte im Format TT.MM.JJJJ angeben.\n\n"
+            "Beispiel:\n"
+            "/register Max Mustermann 01.01.1990"
+        )
+        return
+
+    if parsed_birthdate >= date.today() or parsed_birthdate.year < 1900:
+        await update.message.reply_text("Bitte gib ein gültiges Geburtsdatum an.")
+        return
 
     create_user(telegram_id=telegram_id, first_name=first_name,
                 last_name=last_name, birthdate=birthdate)
@@ -193,10 +189,19 @@ async def approve(update: Update, context: ContextTypes.DEFAULT_TYPE):
         return
 
     user_id = int(update.message.text.split('_')[1])
-    approve_user(user_id)
-    await update.message.reply_text(f"Nutzer {user_id} wurde freigegeben.")
-
     approved_user = get_user_by_id(user_id)
+    if not approved_user:
+        await update.message.reply_text(f"Nutzer {user_id} existiert nicht.")
+        return
+    if approved_user['is_approved'] == 1:
+        await update.message.reply_text(f"Nutzer {user_id} ist bereits freigegeben.")
+        return
+
+    approve_user(user_id)
+    await update.message.reply_text(
+        f"Nutzer {user_id} ({approved_user['first_name']} {approved_user['last_name']}) wurde freigegeben."
+    )
+
     try:
         await context.bot.send_message(
             chat_id=approved_user['telegram_id'],
@@ -226,7 +231,7 @@ async def search(update: Update, context: ContextTypes.DEFAULT_TYPE):
         return
 
     text = "Wähle eine Behörde:\n\n"
-    for cat_id, cat in SEARCH_CATEGORIES.items():
+    for cat_id, cat in enabled_categories().items():
         text += f"{cat_id} - {cat['name']}\n"
         text += f"   {cat['service_name']}\n"
         text += f"   → /search_{cat_id}\n\n"
@@ -252,11 +257,12 @@ async def select_category(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
     cat_id = int(update.message.text.split('_')[1])
 
-    if cat_id not in SEARCH_CATEGORIES:
+    categories = enabled_categories()
+    if cat_id not in categories:
         await update.message.reply_text("Ungültige Auswahl.")
         return
 
-    cat = SEARCH_CATEGORIES[cat_id]
+    cat = categories[cat_id]
 
     # Kategorie im User-State merken, bis Datumspräferenz beantwortet
     context.user_data['pending_cat_id'] = cat_id
@@ -267,7 +273,7 @@ async def select_category(update: Update, context: ContextTypes.DEFAULT_TYPE):
         "Suchst du einen bestimmten Termin oder soll ich alle verfügbaren Termine melden?\n\n"
         "/search_any - Alle verfügbaren Termine melden\n"
         "/search_date TT.MM.JJJJ - Bestimmten Termin suchen\n\n"
-        "Beispiel: /search_date 15.03.2026"
+        f"Beispiel: /search_date {_example_date()}"
     )
 
 
@@ -281,7 +287,7 @@ async def search_any(update: Update, context: ContextTypes.DEFAULT_TYPE):
         return
 
     cat_id = context.user_data.get('pending_cat_id')
-    if not cat_id or cat_id not in SEARCH_CATEGORIES:
+    if cat_id not in enabled_categories():
         await update.message.reply_text(
             "Bitte wähle zuerst eine Behörde mit /search."
         )
@@ -294,7 +300,7 @@ async def search_any(update: Update, context: ContextTypes.DEFAULT_TYPE):
         )
         return
 
-    cat = SEARCH_CATEGORIES[cat_id]
+    cat = enabled_categories()[cat_id]
     create_search(user['id'], cat['scraper'])
     context.user_data.pop('pending_cat_id', None)
 
@@ -319,7 +325,7 @@ async def search_date(update: Update, context: ContextTypes.DEFAULT_TYPE):
         return
 
     cat_id = context.user_data.get('pending_cat_id')
-    if not cat_id or cat_id not in SEARCH_CATEGORIES:
+    if cat_id not in enabled_categories():
         await update.message.reply_text(
             "Bitte wähle zuerst eine Behörde mit /search."
         )
@@ -336,7 +342,7 @@ async def search_date(update: Update, context: ContextTypes.DEFAULT_TYPE):
         await update.message.reply_text(
             "Bitte gib ein Datum an:\n"
             "/search_date TT.MM.JJJJ\n\n"
-            "Beispiel: /search_date 15.03.2026"
+            f"Beispiel: /search_date {_example_date()}"
         )
         return
 
@@ -345,7 +351,7 @@ async def search_date(update: Update, context: ContextTypes.DEFAULT_TYPE):
     except ValueError:
         await update.message.reply_text(
             "Ungültiges Datum. Bitte im Format TT.MM.JJJJ angeben.\n"
-            "Beispiel: /search_date 15.03.2026"
+            f"Beispiel: /search_date {_example_date()}"
         )
         return
 
@@ -356,7 +362,7 @@ async def search_date(update: Update, context: ContextTypes.DEFAULT_TYPE):
         )
         return
 
-    cat = SEARCH_CATEGORIES[cat_id]
+    cat = enabled_categories()[cat_id]
     create_search(user['id'], cat['scraper'], target_date=target.isoformat())
     context.user_data.pop('pending_cat_id', None)
 
@@ -413,11 +419,14 @@ async def status(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await update.message.reply_text("Suche läuft... einen Moment bitte.")
 
     try:
-        result = await asyncio.get_event_loop().run_in_executor(
-            None, _run_scraper, active_search['search_type']
-        )
+        result = await asyncio.to_thread(fetch_availability, active_search['search_type'])
     except Exception as e:
-        await update.message.reply_text(f"Fehler beim Abrufen der Termine: {e}")
+        reference = log_error(f"/status ({active_search['search_type']}): {e!r}", user['id'])
+        await update.message.reply_text(
+            "Die Termine konnten gerade nicht abgerufen werden. "
+            "Bitte versuche es später erneut.\n"
+            f"Fehlerreferenz: {reference}"
+        )
         return
 
     if result["available"]:
