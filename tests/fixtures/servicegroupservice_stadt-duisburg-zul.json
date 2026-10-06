@@ -3,210 +3,245 @@
   "sgid": 82034,
   "sg": "Fahrzeugzulassung",
   "sid": 217882,
-  "s": "Ausfuhrkennzeichen beantragen"
+  "s": "Ausfuhrkennzeichen beantragen",
+  "duration": 15
  },
  {
   "sgid": 82034,
   "sg": "Fahrzeugzulassung",
   "sid": 217883,
-  "s": "Kurzzeitkennzeichen beantragen"
+  "s": "Kurzzeitkennzeichen beantragen",
+  "duration": 15
  },
  {
   "sgid": 82034,
   "sg": "Fahrzeugzulassung",
   "sid": 217884,
-  "s": "Wiederzulassung eines außer Betrieb gesetzten Fahrzeugs"
+  "s": "Wiederzulassung eines außer Betrieb gesetzten Fahrzeugs",
+  "duration": 15
  },
  {
   "sgid": 82034,
   "sg": "Fahrzeugzulassung",
   "sid": 217885,
-  "s": "Zulassung eines Fahrzeugs auf eine(n) Minderjährige(n)"
+  "s": "Zulassung eines Fahrzeugs auf eine(n) Minderjährige(n)",
+  "duration": 15
  },
  {
   "sgid": 82034,
   "sg": "Fahrzeugzulassung",
   "sid": 217886,
-  "s": "Zulassung eines importierten Gebraucht - Fahrzeugs aus einem Mitgliedstaat der Europäischen Union"
+  "s": "Zulassung eines importierten Gebraucht - Fahrzeugs aus einem Mitgliedstaat der Europäischen Union",
+  "duration": 15
  },
  {
   "sgid": 82034,
   "sg": "Fahrzeugzulassung",
   "sid": 217893,
-  "s": "Zulassung eines importierten Gebraucht-Fahrzeugs aus einem Staat, der nicht zur EU gehört"
+  "s": "Zulassung eines importierten Gebraucht-Fahrzeugs aus einem Staat, der nicht zur EU gehört",
+  "duration": 15
  },
  {
   "sgid": 82034,
   "sg": "Fahrzeugzulassung",
   "sid": 217894,
-  "s": "Zulassung eines importierten Neu - Fahrzeugs aus einem Staat, der nicht zur EU gehört"
+  "s": "Zulassung eines importierten Neu - Fahrzeugs aus einem Staat, der nicht zur EU gehört",
+  "duration": 15
  },
  {
   "sgid": 82034,
   "sg": "Fahrzeugzulassung",
   "sid": 217899,
-  "s": "Zulassung eines Neufahrzeugs"
+  "s": "Zulassung eines Neufahrzeugs",
+  "duration": 15
  },
  {
   "sgid": 82034,
   "sg": "Fahrzeugzulassung",
   "sid": 220237,
-  "s": "Zulassung eines importierten Neu-Fahrzeugs aus einem Mitgliedstaat der EU"
+  "s": "Zulassung eines importierten Neu-Fahrzeugs aus einem Mitgliedstaat der EU",
+  "duration": 15
  },
  {
   "sgid": 84009,
   "sg": "Änderung der Fahrzeugpapiere",
   "sid": 217935,
-  "s": "Berichtigung der Zulassungsbescheinigung Teil I (ZB I) bei Wohnortwechsel innerhalb Duisburgs"
+  "s": "Berichtigung der Zulassungsbescheinigung Teil I (ZB I) bei Wohnortwechsel innerhalb Duisburgs",
+  "duration": 15
  },
  {
   "sgid": 84009,
   "sg": "Änderung der Fahrzeugpapiere",
   "sid": 217936,
-  "s": "Berichtigung der Zulassungsbescheinigung Teil I (ZB I) bei Verlegung des Firmensitzes innerhalb Duisburgs"
+  "s": "Berichtigung der Zulassungsbescheinigung Teil I (ZB I) bei Verlegung des Firmensitzes innerhalb Duisburgs",
+  "duration": 15
  },
  {
   "sgid": 84009,
   "sg": "Änderung der Fahrzeugpapiere",
   "sid": 217938,
-  "s": "Berichtigung von Fahrzeugschein/Zulassungsbescheinigung Teil I (ZB I) und Fahrzeugbrief/Zulassungsbescheinigung Teil II (ZB II) bei Namensänderung (privat oder Firma)"
+  "s": "Berichtigung von Fahrzeugschein/Zulassungsbescheinigung Teil I (ZB I) und Fahrzeugbrief/Zulassungsbescheinigung Teil II (ZB II) bei Namensänderung (privat oder Firma)",
+  "duration": 15
  },
  {
   "sgid": 84003,
   "sg": "Diebstahl/ Verlust",
   "sid": 217921,
-  "s": "Umkennzeichnung bei Verlust, Diebstahl oder sonstigem Abhandenkommen eines Kennzeichenschildes/mehrerer Kennzeichenschilder"
+  "s": "Umkennzeichnung bei Verlust, Diebstahl oder sonstigem Abhandenkommen eines Kennzeichenschildes/mehrerer Kennzeichenschilder",
+  "duration": 15
  },
  {
   "sgid": 84003,
   "sg": "Diebstahl/ Verlust",
   "sid": 217922,
-  "s": "Verlust, Diebstahl oder sonstiges Abhandenkommen des Fahrzeugbriefes/der Zulassungsbescheinigung Teil II (ZB II)"
+  "s": "Verlust, Diebstahl oder sonstiges Abhandenkommen des Fahrzeugbriefes/der Zulassungsbescheinigung Teil II (ZB II)",
+  "duration": 15
  },
  {
   "sgid": 84003,
   "sg": "Diebstahl/ Verlust",
   "sid": 217920,
-  "s": "Diebstahl eines Fahrzeugs - Außerbetriebsetzung"
+  "s": "Diebstahl eines Fahrzeugs - Außerbetriebsetzung",
+  "duration": 15
  },
  {
   "sgid": 84003,
   "sg": "Diebstahl/ Verlust",
   "sid": 217931,
-  "s": "Verlust, Diebstahl oder sonstiges Abhandenkommen des Fahrzeugscheins/der Zulassungsbescheinigung Teil I (ZB I)"
+  "s": "Verlust, Diebstahl oder sonstiges Abhandenkommen des Fahrzeugscheins/der Zulassungsbescheinigung Teil I (ZB I)",
+  "duration": 15
  },
  {
   "sgid": 83985,
   "sg": "Umschreibungen",
   "sid": 217857,
-  "s": "Umschreibung eines in Duisburg zugelassenen Fahrzeugs"
+  "s": "Umschreibung eines in Duisburg zugelassenen Fahrzeugs",
+  "duration": 15
  },
  {
   "sgid": 83985,
   "sg": "Umschreibungen",
   "sid": 217873,
-  "s": "Umschreibung eines nicht in Duisburg zugelassenen Fahrzeugs"
+  "s": "Umschreibung eines nicht in Duisburg zugelassenen Fahrzeugs",
+  "duration": 15
  },
  {
   "sgid": 83985,
   "sg": "Umschreibungen",
   "sid": 217940,
-  "s": "Berichtigung der Zulassungsbescheinigung Teil I (ZB I) bei Wohnortwechsel innerhalb Duisburgs"
+  "s": "Berichtigung der Zulassungsbescheinigung Teil I (ZB I) bei Wohnortwechsel innerhalb Duisburgs",
+  "duration": 15
  },
  {
   "sgid": 83985,
   "sg": "Umschreibungen",
   "sid": 217942,
-  "s": "Berichtigung der Zulassungsbescheinigung Teil I (ZB I) bei Verlegung des Firmensitzes innerhalb Duisburgs"
+  "s": "Berichtigung der Zulassungsbescheinigung Teil I (ZB I) bei Verlegung des Firmensitzes innerhalb Duisburgs",
+  "duration": 15
  },
  {
   "sgid": 83985,
   "sg": "Umschreibungen",
   "sid": 217943,
-  "s": "Berichtigung von Fahrzeugschein/Zulassungsbescheinigung Teil I (ZB I) und Fahrzeugbrief/Zulassungsbescheinigung Teil II (ZB II) bei Namensänderung (privat oder Firma)"
+  "s": "Berichtigung von Fahrzeugschein/Zulassungsbescheinigung Teil I (ZB I) und Fahrzeugbrief/Zulassungsbescheinigung Teil II (ZB II) bei Namensänderung (privat oder Firma)",
+  "duration": 15
  },
  {
   "sgid": 83987,
   "sg": "Kennzeichen",
   "sid": 217900,
-  "s": "Beschädigtes Kennzeichen"
+  "s": "Beschädigtes Kennzeichen",
+  "duration": 15
  },
  {
   "sgid": 83987,
   "sg": "Kennzeichen",
   "sid": 217901,
-  "s": "Beschädigtes Stadtsiegel/ HU-Plakette auf einem Kennzeichenschild"
+  "s": "Beschädigtes Stadtsiegel/ HU-Plakette auf einem Kennzeichenschild",
+  "duration": 15
  },
  {
   "sgid": 83987,
   "sg": "Kennzeichen",
   "sid": 217902,
-  "s": "Oldtimerkennzeichen beantragen"
+  "s": "Oldtimerkennzeichen beantragen",
+  "duration": 15
  },
  {
   "sgid": 83987,
   "sg": "Kennzeichen",
   "sid": 217903,
-  "s": "Saisonkennzeichen beantragen"
+  "s": "Saisonkennzeichen beantragen",
+  "duration": 15
  },
  {
   "sgid": 83987,
   "sg": "Kennzeichen",
   "sid": 217904,
-  "s": "Umkennzeichnung auf ein Wunschkennzeichen"
+  "s": "Umkennzeichnung auf ein Wunschkennzeichen",
+  "duration": 15
  },
  {
   "sgid": 83987,
   "sg": "Kennzeichen",
   "sid": 217905,
-  "s": "Umkennzeichnung bei Verlust, Diebstahl oder sonstigem Abhandenkommen eines Kennzeichenschildes/mehrerer Kennzeichenschilder"
+  "s": "Umkennzeichnung bei Verlust, Diebstahl oder sonstigem Abhandenkommen eines Kennzeichenschildes/mehrerer Kennzeichenschilder",
+  "duration": 15
  },
  {
   "sgid": 83987,
   "sg": "Kennzeichen",
   "sid": 217907,
-  "s": "Zuteilung eines Wechselkennzeichens für zwei Fahrzeuge"
+  "s": "Zuteilung eines Wechselkennzeichens für zwei Fahrzeuge",
+  "duration": 15
  },
  {
   "sgid": 83987,
   "sg": "Kennzeichen",
   "sid": 217908,
-  "s": "Wunschkennzeichen"
+  "s": "Wunschkennzeichen",
+  "duration": 15
  },
  {
   "sgid": 83988,
   "sg": "Technik",
   "sid": 217914,
-  "s": "Katalysator nachrüsten"
+  "s": "Katalysator nachrüsten",
+  "duration": 15
  },
  {
   "sgid": 83988,
   "sg": "Technik",
   "sid": 217916,
-  "s": "Nachrüstung eines umweltfreundlichen Partikelminderungssystems bei Dieselfahrzeugen"
+  "s": "Nachrüstung eines umweltfreundlichen Partikelminderungssystems bei Dieselfahrzeugen",
+  "duration": 15
  },
  {
   "sgid": 83988,
   "sg": "Technik",
   "sid": 217918,
-  "s": "Nachträgliche Eintragung bei technischen Veränderungen am Fahrzeug"
+  "s": "Nachträgliche Eintragung bei technischen Veränderungen am Fahrzeug",
+  "duration": 15
  },
  {
   "sgid": 83988,
   "sg": "Technik",
   "sid": 217919,
-  "s": "Gespanne bis 100km/h"
+  "s": "Gespanne bis 100km/h",
+  "duration": 15
  },
  {
   "sgid": 83981,
   "sg": "Abmeldung",
   "sid": 217855,
-  "s": "Abmeldung / Außerbetriebsetzung"
+  "s": "Abmeldung / Außerbetriebsetzung",
+  "duration": 10
  },
  {
   "sgid": 95465,
   "sg": "Leistungsgruppe",
   "sid": null,
-  "s": ""
+  "s": "",
+  "duration": null
  }
 ]

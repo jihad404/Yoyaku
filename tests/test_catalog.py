@@ -90,5 +90,7 @@ def test_location_from_calendar(calendar, expected):
 
 
 def test_booking_url_preselects_service():
+    # Nur diese Form wählt die Dienstleistung vor und öffnet direkt den Kalender
+    # (im Browser geprüft am 06.10.2026; "?serviceid=" wird ignoriert)
     assert catalog.booking_url(SERVICES["wiederzulassung"]) == \
-        "https://www.etermin.net/stadt-duisburg-zul?serviceid=217884"
+        "https://www.etermin.net/stadt-duisburg-zul/serviceid/217884"

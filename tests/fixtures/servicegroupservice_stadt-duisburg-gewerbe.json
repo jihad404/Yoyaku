@@ -3,42 +3,49 @@
   "sgid": 122164,
   "sg": "Gewerbemeldestelle",
   "sid": 349618,
-  "s": "Gewerbeanmeldung"
+  "s": "Gewerbeanmeldung",
+  "duration": 30
  },
  {
   "sgid": 122164,
   "sg": "Gewerbemeldestelle",
   "sid": 349619,
-  "s": "Gewerbeabmeldung"
+  "s": "Gewerbeabmeldung",
+  "duration": 30
  },
  {
   "sgid": 122164,
   "sg": "Gewerbemeldestelle",
   "sid": 349620,
-  "s": "Gewerbeummeldung"
+  "s": "Gewerbeummeldung",
+  "duration": 30
  },
  {
   "sgid": 122164,
   "sg": "Gewerbemeldestelle",
   "sid": 349621,
-  "s": "Gewerbeauskünfte erteilen (mündlich/schriftlich)/ Ersatzbescheinigungen "
+  "s": "Gewerbeauskünfte erteilen (mündlich/schriftlich)/ Ersatzbescheinigungen ",
+  "duration": 30
  },
  {
   "sgid": 133183,
   "sg": "Allgemeine Gewerbeangelegenheiten",
   "sid": 372904,
-  "s": "Gewerbezentralregisterauszüge"
+  "s": "Gewerbezentralregisterauszüge",
+  "duration": 10
  },
  {
   "sgid": 133183,
   "sg": "Allgemeine Gewerbeangelegenheiten",
   "sid": 372905,
-  "s": "Reisegewerbeangelegenheiten"
+  "s": "Reisegewerbeangelegenheiten",
+  "duration": 30
  },
  {
   "sgid": 133183,
   "sg": "Allgemeine Gewerbeangelegenheiten",
   "sid": 372906,
-  "s": "Maklerangelegenheiten"
+  "s": "Maklerangelegenheiten",
+  "duration": 30
  }
 ]

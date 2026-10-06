@@ -42,7 +42,7 @@ def test_earliest_notifies_with_times_and_buttons(make_user):
     assert chat_id == 100
     assert "Früherer Termin" in text and "Fr 09.10." in text and "09:20" in text and "Mi 14.10." in text
     assert f"stop:{sid}" in callback_datas(markup)
-    assert "https://www.etermin.net/stadt-duisburg-zul?serviceid=217884" in callback_datas(markup)
+    assert "https://www.etermin.net/stadt-duisburg-zul/serviceid/217884" in callback_datas(markup)
     assert load_state(get_search(sid))["earliest"] == "2026-10-09"
 
 

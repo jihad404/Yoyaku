@@ -12,6 +12,8 @@ from scrapers import etermin
 from scrapers.catalog import SITES, Service, location_for_calendar
 
 CACHE_TTL = 60
+# Einstellungen der Buchungsseiten und Dauer der Dienstleistungen ändern sich selten
+SETTINGS_TTL = 6 * 60 * 60
 # Höchstens so viele gleichzeitige Anfragen an eTermin (schont den Server,
 # ist aber deutlich schneller als strikt nacheinander)
 MAX_PARALLEL = 4
@@ -36,31 +38,48 @@ class Availability:
             await self._client.aclose()
             self._client = None
 
-    async def _cached(self, key, fetch):
+    async def _cached(self, key, fetch, ttl: float | None = None):
+        ttl = self._ttl if ttl is None else ttl
         lock = self._locks.setdefault(key, asyncio.Lock())
         async with lock:
             hit = self._cache.get(key)
-            if hit and time.monotonic() - hit[0] < self._ttl:
+            if hit and time.monotonic() - hit[0] < ttl:
                 return hit[1]
             async with self._semaphore:
                 value = await fetch()
             self._cache[key] = (time.monotonic(), value)
             return value
 
+    async def _params(self, service: Service) -> dict:
+        """Anfrageparameter wie auf der Buchungsseite: deren Einstellungen plus
+        die Dauer der Dienstleistung."""
+        webid = SITES[service.site].webid
+        settings = await self._cached(
+            ("settings", webid), lambda: etermin.booking_settings(self._get_client(), webid), SETTINGS_TTL)
+        durations = await self._cached(
+            ("durations", webid),
+            lambda: self._durations(webid), SETTINGS_TTL)
+        return {**settings, "duration": str(durations.get(service.sid, 0))}
+
+    async def _durations(self, webid: str) -> dict:
+        return {s["sid"]: s["duration"] for s in await etermin.list_services(self._get_client(), webid)}
+
     async def days(self, service: Service) -> list[date]:
         """Alle Tage mit freien Terminen (alle Standorte)."""
         site = SITES[service.site]
+        params = await self._params(service)
         return await self._cached(
             ("days", site.webid, service.sid),
-            lambda: etermin.available_days(self._get_client(), site.webid, service.sid),
+            lambda: etermin.available_days(self._get_client(), site.webid, service.sid, params=params),
         )
 
     async def slots(self, service: Service, day: date, location: str | None = None) -> list[etermin.Slot]:
         """Freie Zeitfenster eines Tages, optional nur an einem Standort."""
         site = SITES[service.site]
+        params = await self._params(service)
         result = await self._cached(
             ("slots", site.webid, service.sid, day),
-            lambda: etermin.slots(self._get_client(), site.webid, service.sid, day),
+            lambda: etermin.slots(self._get_client(), site.webid, service.sid, day, params=params),
         )
         if location:
             result = [s for s in result if location_for_calendar(s.calendar) == location]

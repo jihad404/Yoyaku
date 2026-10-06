@@ -336,7 +336,8 @@ def known_sids(site: str) -> set[int]:
 
 
 def booking_url(service: Service) -> str:
-    return f"https://www.etermin.net/{SITES[service.site].webid}?serviceid={service.sid}"
+    # Nur diese Form wählt die Dienstleistung vor und öffnet direkt den Kalender
+    return f"https://www.etermin.net/{SITES[service.site].webid}/serviceid/{service.sid}"
 
 
 def service_label(service: Service, location: str | None = None) -> str:

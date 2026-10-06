@@ -1,10 +1,23 @@
 import asyncio
 from datetime import date, datetime
 
+import pytest
+
 from scrapers import etermin, registry
 from scrapers.catalog import SERVICES
 
 D = lambda day: date(2026, 10, day)  # noqa: E731
+
+
+@pytest.fixture(autouse=True)
+def no_settings_requests(monkeypatch):
+    async def settings(client, webid):
+        return {}
+
+    async def services(client, webid):
+        return []
+    monkeypatch.setattr(etermin, "booking_settings", settings)
+    monkeypatch.setattr(etermin, "list_services", services)
 
 
 class SlowSlots:
@@ -16,7 +29,7 @@ class SlowSlots:
         self.max_in_flight = 0
         self.calls = []
 
-    async def __call__(self, client, webid, sid, day):
+    async def __call__(self, client, webid, sid, day, params=None):
         self.calls.append(day)
         self.in_flight += 1
         self.max_in_flight = max(self.max_in_flight, self.in_flight)
@@ -39,6 +52,42 @@ def test_matching_days_fetches_in_parallel_and_keeps_order(monkeypatch):
     assert result == [D(8), D(20)]                       # Reihenfolge nach Datum, Limit eingehalten
     assert 1 < fake.max_in_flight <= registry.MAX_PARALLEL
     assert len(fake.calls) < len(days)                   # bricht nach Erreichen des Limits ab
+
+
+def test_requests_use_booking_page_settings_and_service_duration(monkeypatch):
+    calls = {"settings": 0, "services": 0}
+    seen_params = []
+
+    async def fake_settings(client, webid):
+        calls["settings"] += 1
+        return {"caching": "true", "appfuture": "30"}
+
+    async def fake_services(client, webid):
+        calls["services"] += 1
+        return [{"sid": 90492, "name": "Anmeldungen", "group": "x", "duration": 12}]
+
+    async def fake_days(client, webid, sid, params=None):
+        seen_params.append(params)
+        return [D(15)]
+
+    async def fake_slots(client, webid, sid, day, params=None):
+        seen_params.append(params)
+        return []
+
+    monkeypatch.setattr(etermin, "booking_settings", fake_settings)
+    monkeypatch.setattr(etermin, "list_services", fake_services)
+    monkeypatch.setattr(etermin, "available_days", fake_days)
+    monkeypatch.setattr(etermin, "slots", fake_slots)
+
+    async def run():
+        availability = registry.Availability(client_factory=lambda: None)
+        await availability.days(SERVICES["anmeldung"])
+        await availability.slots(SERVICES["anmeldung"], D(15))
+        await availability.slots(SERVICES["anmeldung"], D(16))
+
+    asyncio.run(run())
+    assert all(p == {"caching": "true", "appfuture": "30", "duration": "12"} for p in seen_params)
+    assert calls == {"settings": 1, "services": 1}   # Einstellungen werden zwischengespeichert
 
 
 def test_matching_days_without_location_needs_no_requests(monkeypatch):

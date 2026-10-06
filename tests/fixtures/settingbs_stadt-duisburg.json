@@ -1,0 +1,13 @@
+[
+ {
+  "caching": true,
+  "cluster": false,
+  "fillcalendarstrategy": 0,
+  "showavcap": false,
+  "appfuture": 30,
+  "appdeadline": 0,
+  "appdeadlinewm": 0,
+  "msdcm": 0,
+  "timezone": "W. Europe Standard Time"
+ }
+]

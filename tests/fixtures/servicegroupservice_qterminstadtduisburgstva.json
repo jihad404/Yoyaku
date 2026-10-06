@@ -3,150 +3,175 @@
   "sgid": 53426,
   "sg": "Ersatzführerschein (Verlust / Diebstahl)",
   "sid": 110007,
-  "s": "Ersatz nach  Verlust/Diebstahl"
+  "s": "Ersatz nach  Verlust/Diebstahl",
+  "duration": 15
  },
  {
   "sgid": 53431,
   "sg": "Ausstellung Internationaler Führerschein",
   "sid": 110021,
-  "s": "Internationaler Führerschein (im Besitz grauer/rosa FS oder aus anderer Stadt)"
+  "s": "Internationaler Führerschein (im Besitz grauer/rosa FS oder aus anderer Stadt)",
+  "duration": 15
  },
  {
   "sgid": 53431,
   "sg": "Ausstellung Internationaler Führerschein",
   "sid": 110022,
-  "s": "Internationaler Führerschein (im Besitz des Kartenführerscheins, ausgestellt in Duisburg)"
+  "s": "Internationaler Führerschein (im Besitz des Kartenführerscheins, ausgestellt in Duisburg)",
+  "duration": 15
  },
  {
   "sgid": 53432,
   "sg": "Umschreibung ausländischer Fahrerlaubnisse",
   "sid": 110023,
-  "s": "Umschreibung ausländische Drittstaats-Fahrerlaubnis (Nicht-EU)"
+  "s": "Umschreibung ausländische Drittstaats-Fahrerlaubnis (Nicht-EU)",
+  "duration": 20
  },
  {
   "sgid": 53432,
   "sg": "Umschreibung ausländischer Fahrerlaubnisse",
   "sid": 110025,
-  "s": "Umschreibung ausländische EU-Fahrerlaubnis"
+  "s": "Umschreibung ausländische EU-Fahrerlaubnis",
+  "duration": 25
  },
  {
   "sgid": 53427,
   "sg": "Personenbeförderung, Berufskraftverkehr",
   "sid": 110008,
-  "s": "Fahrerlaubnis zur Fahrgastbeförderung („Taxischein“)"
+  "s": "Fahrerlaubnis zur Fahrgastbeförderung („Taxischein“)",
+  "duration": 15
  },
  {
   "sgid": 53427,
   "sg": "Personenbeförderung, Berufskraftverkehr",
   "sid": 110010,
-  "s": "Fahrerkarte beantragen"
+  "s": "Fahrerkarte beantragen",
+  "duration": 10
  },
  {
   "sgid": 53427,
   "sg": "Personenbeförderung, Berufskraftverkehr",
   "sid": 110018,
-  "s": "Eintragung Schlüsselzahl 95 - FQN (\"Module\" BKrFQG)"
+  "s": "Eintragung Schlüsselzahl 95 - FQN (\"Module\" BKrFQG)",
+  "duration": 10
  },
  {
   "sgid": 53427,
   "sg": "Personenbeförderung, Berufskraftverkehr",
   "sid": 110019,
-  "s": "Verlängerung Klasse C/CE (beinhaltet auch Fahrerkarte & FQN)"
+  "s": "Verlängerung Klasse C/CE (beinhaltet auch Fahrerkarte & FQN)",
+  "duration": 20
  },
  {
   "sgid": 53427,
   "sg": "Personenbeförderung, Berufskraftverkehr",
   "sid": 110020,
-  "s": "Verlängerung Klasse D/DE  (beinhaltet auch Fahrerkarte & FQN)"
+  "s": "Verlängerung Klasse D/DE  (beinhaltet auch Fahrerkarte & FQN)",
+  "duration": 20
  },
  {
   "sgid": 53433,
   "sg": "Sonstige Fahrerlaubnisangelegenheiten",
   "sid": 110033,
-  "s": "Eintragung Schlüsselzahl B96 & B196 & B197"
+  "s": "Eintragung Schlüsselzahl B96 & B196 & B197",
+  "duration": 15
  },
  {
   "sgid": 53433,
   "sg": "Sonstige Fahrerlaubnisangelegenheiten",
   "sid": 110027,
-  "s": "Fahrschulwechsel"
+  "s": "Fahrschulwechsel",
+  "duration": 15
  },
  {
   "sgid": 53433,
   "sg": "Sonstige Fahrerlaubnisangelegenheiten",
   "sid": 110028,
-  "s": "Änderung Theorieprüfung (Sprache, Ausweis, o.ä.)"
+  "s": "Änderung Theorieprüfung (Sprache, Ausweis, o.ä.)",
+  "duration": 10
  },
  {
   "sgid": 53433,
   "sg": "Sonstige Fahrerlaubnisangelegenheiten",
   "sid": 110031,
-  "s": "Vorsprache zur laufenden Wiedererteilung"
+  "s": "Vorsprache zur laufenden Wiedererteilung",
+  "duration": 15
  },
  {
   "sgid": 53433,
   "sg": "Sonstige Fahrerlaubnisangelegenheiten",
   "sid": 110032,
-  "s": "Beratung zum laufenden Führerscheinantrag"
+  "s": "Beratung zum laufenden Führerscheinantrag",
+  "duration": 20
  },
  {
   "sgid": 53433,
   "sg": "Sonstige Fahrerlaubnisangelegenheiten",
   "sid": 110030,
-  "s": "Umschreibung von Dienstführerscheinen (BW/Polizei)"
+  "s": "Umschreibung von Dienstführerscheinen (BW/Polizei)",
+  "duration": 20
  },
  {
   "sgid": 53433,
   "sg": "Sonstige Fahrerlaubnisangelegenheiten",
   "sid": 155245,
-  "s": "Änderung von Auflagen (z.B. Sehhilfe)"
+  "s": "Änderung von Auflagen (z.B. Sehhilfe)",
+  "duration": 15
  },
  {
   "sgid": 53434,
   "sg": "Umtausch Führerschein",
   "sid": 345805,
-  "s": "Umtausch eines deutschen Führerscheins"
+  "s": "Umtausch eines deutschen Führerscheins",
+  "duration": 15
  },
  {
   "sgid": 52956,
   "sg": "Abholung & Versand von Führerscheinen",
   "sid": 108401,
-  "s": "Abholung Führerschein"
+  "s": "Abholung Führerschein",
+  "duration": 15
  },
  {
   "sgid": 52956,
   "sg": "Abholung & Versand von Führerscheinen",
   "sid": 131749,
-  "s": "Änderung Wohnanschrift Direktversand"
+  "s": "Änderung Wohnanschrift Direktversand",
+  "duration": 10
  },
  {
   "sgid": 53435,
   "sg": "Fahrerlaubnisbeantragung",
   "sid": 110036,
-  "s": "Ersterteilung"
+  "s": "Ersterteilung",
+  "duration": 60
  },
  {
   "sgid": 53435,
   "sg": "Fahrerlaubnisbeantragung",
   "sid": 110037,
-  "s": "Ersterteilung mit begleitetem Fahren ab 17"
+  "s": "Ersterteilung mit begleitetem Fahren ab 17",
+  "duration": 60
  },
  {
   "sgid": 53435,
   "sg": "Fahrerlaubnisbeantragung",
   "sid": 110038,
-  "s": "Erweiterung"
+  "s": "Erweiterung",
+  "duration": 60
  },
  {
   "sgid": 53435,
   "sg": "Fahrerlaubnisbeantragung",
   "sid": 110039,
-  "s": "Neuerteilung (\"Wiedererteilung\")"
+  "s": "Neuerteilung (\"Wiedererteilung\")",
+  "duration": 60
  },
  {
   "sgid": 163472,
   "sg": "Walk-By",
   "sid": null,
-  "s": ""
+  "s": "",
+  "duration": null
  }
 ]

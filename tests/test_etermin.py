@@ -38,6 +38,55 @@ def test_available_days_queries_each_month_and_merges():
     assert len(days) == 13
 
 
+def test_booking_settings_mirror_the_booking_page():
+    def handler(request):
+        assert request.url.path == "/api/settingbs"
+        return httpx.Response(200, json=load_fixture("settingbs_stadt-duisburg.json"))
+
+    async def run():
+        async with _client(handler) as client:
+            return await etermin.booking_settings(client, "stadt-duisburg")
+
+    params = asyncio.run(run())
+    # genau die Werte, die die Buchungsseite am 06.10.2026 mitgeschickt hat
+    assert params["caching"] == "true"
+    assert params["appfuture"] == "30"
+    assert params["appdeadline"] == "0"
+    assert params["tzaccount"] == "W. Europe Standard Time"
+
+
+def test_params_are_sent_with_requests():
+    seen = []
+
+    def handler(request):
+        seen.append(dict(request.url.params))
+        return httpx.Response(200, json=[])
+
+    params = {"caching": "true", "duration": "12", "appfuture": "30"}
+
+    async def run():
+        async with _client(handler) as client:
+            await etermin.available_days(client, "stadt-duisburg", 90492, today=date(2026, 10, 6), months=1,
+                                         params=params)
+            await etermin.slots(client, "stadt-duisburg", 90492, date(2026, 10, 15), params=params)
+
+    asyncio.run(run())
+    for p in seen:
+        assert (p["caching"], p["duration"], p["appfuture"]) == ("true", "12", "30")
+
+
+def test_list_services_includes_duration():
+    def handler(request):
+        return httpx.Response(200, json=load_fixture("servicegroupservice_stadt-duisburg.json"))
+
+    async def run():
+        async with _client(handler) as client:
+            return await etermin.list_services(client, "stadt-duisburg")
+
+    anmeldung = next(s for s in asyncio.run(run()) if s["sid"] == 90492)
+    assert anmeldung["duration"] == 12
+
+
 def test_slots_parses_time_and_calendar():
     def handler(request):
         assert "rangesearch" not in request.url.params
@@ -64,8 +113,9 @@ def test_list_services_skips_empty_groups():
 
     services = asyncio.run(run())
     assert len(services) == 34
-    assert {"sid": 217884, "name": "Wiederzulassung eines außer Betrieb gesetzten Fahrzeugs",
-            "group": "Fahrzeugzulassung"} in services
+    wiederzulassung = next(s for s in services if s["sid"] == 217884)
+    assert wiederzulassung["name"] == "Wiederzulassung eines außer Betrieb gesetzten Fahrzeugs"
+    assert wiederzulassung["group"] == "Fahrzeugzulassung"
 
 
 @pytest.mark.parametrize("response", [

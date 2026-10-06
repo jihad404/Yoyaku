@@ -3,186 +3,217 @@
   "sgid": 46563,
   "sg": "Meldeangelegenheiten",
   "sid": 90492,
-  "s": "Anmeldungen"
+  "s": "Anmeldungen",
+  "duration": 12
  },
  {
   "sgid": 46563,
   "sg": "Meldeangelegenheiten",
   "sid": 90493,
-  "s": "Abmeldungen"
+  "s": "Abmeldungen",
+  "duration": 10
  },
  {
   "sgid": 46563,
   "sg": "Meldeangelegenheiten",
   "sid": 90494,
-  "s": "Ummeldungen (innerhalb Duisburgs)"
+  "s": "Ummeldungen (innerhalb Duisburgs)",
+  "duration": 8
  },
  {
   "sgid": 46563,
   "sg": "Meldeangelegenheiten",
   "sid": 94180,
-  "s": "Führungszeugnis"
+  "s": "Führungszeugnis",
+  "duration": 5
  },
  {
   "sgid": 46563,
   "sg": "Meldeangelegenheiten",
   "sid": 94181,
-  "s": "Bescheinigungen (Meldebescheinigung, Lebensbescheinigung, Aufenthaltsbescheinigungen)"
+  "s": "Bescheinigungen (Meldebescheinigung, Lebensbescheinigung, Aufenthaltsbescheinigungen)",
+  "duration": 5
  },
  {
   "sgid": 46563,
   "sg": "Meldeangelegenheiten",
   "sid": 94182,
-  "s": "Melderegisterauskunft (Hausauskünfte)"
+  "s": "Melderegisterauskunft (Hausauskünfte)",
+  "duration": 10
  },
  {
   "sgid": 46563,
   "sg": "Meldeangelegenheiten",
   "sid": 94183,
-  "s": "Steueridentifikationsnummer (Lohnsteuer ID)"
+  "s": "Steueridentifikationsnummer (Lohnsteuer ID)",
+  "duration": 5
  },
  {
   "sgid": 46563,
   "sg": "Meldeangelegenheiten",
   "sid": 393309,
-  "s": "Änderung des Familienstandes"
+  "s": "Änderung des Familienstandes",
+  "duration": 10
  },
  {
   "sgid": 46444,
   "sg": "Pass- und Ausweiswesen",
   "sid": 90152,
-  "s": "Personalausweis beantragen"
+  "s": "Personalausweis beantragen",
+  "duration": 10
  },
  {
   "sgid": 46444,
   "sg": "Pass- und Ausweiswesen",
   "sid": 90153,
-  "s": "Reisepass beantragen"
+  "s": "Reisepass beantragen",
+  "duration": 10
  },
  {
   "sgid": 46444,
   "sg": "Pass- und Ausweiswesen",
   "sid": 90491,
-  "s": "Ausstellung eines vorläufigen Personalausweises Reisepasses"
+  "s": "Ausstellung eines vorläufigen Personalausweises Reisepasses",
+  "duration": 10
  },
  {
   "sgid": 46444,
   "sg": "Pass- und Ausweiswesen",
   "sid": 93352,
-  "s": "Abholung von Personalausweisen, Reisepässen oder e ID Ausweiskarten (nur EU-Bürger)"
+  "s": "Abholung von Personalausweisen, Reisepässen oder e ID Ausweiskarten (nur EU-Bürger)",
+  "duration": 5
  },
  {
   "sgid": 46444,
   "sg": "Pass- und Ausweiswesen",
   "sid": 194814,
-  "s": "e ID Ausweiskarte (nur EU-Bürger) beantragen"
+  "s": "e ID Ausweiskarte (nur EU-Bürger) beantragen",
+  "duration": 20
  },
  {
   "sgid": 46444,
   "sg": "Pass- und Ausweiswesen",
   "sid": 194823,
-  "s": "Aktivierung PIN Personalausweis"
+  "s": "Aktivierung PIN Personalausweis",
+  "duration": 10
  },
  {
   "sgid": 46564,
   "sg": "KFZ- /Führerscheinangelegenheiten",
   "sid": 90495,
-  "s": "Adressen- und Namensänderungen KfZ-Schein (ZB I)"
+  "s": "Adressen- und Namensänderungen KfZ-Schein (ZB I)",
+  "duration": 8
  },
  {
   "sgid": 46564,
   "sg": "KFZ- /Führerscheinangelegenheiten",
   "sid": 90496,
-  "s": "Führerscheinanträge (Erstantrag , Erweiterung, Verlängerung, Wiedererteilung)"
+  "s": "Führerscheinanträge (Erstantrag , Erweiterung, Verlängerung, Wiedererteilung)",
+  "duration": 12
  },
  {
   "sgid": 46564,
   "sg": "KFZ- /Führerscheinangelegenheiten",
   "sid": 93353,
-  "s": "Führerscheine aushändigen"
+  "s": "Führerscheine aushändigen",
+  "duration": 5
  },
  {
   "sgid": 46564,
   "sg": "KFZ- /Führerscheinangelegenheiten",
   "sid": 93354,
-  "s": "Führerscheine entgegennehmen"
+  "s": "Führerscheine entgegennehmen",
+  "duration": 12
  },
  {
   "sgid": 46564,
   "sg": "KFZ- /Führerscheinangelegenheiten",
   "sid": 93355,
-  "s": "Führerscheinumtausch"
+  "s": "Führerscheinumtausch",
+  "duration": 12
  },
  {
   "sgid": 46564,
   "sg": "KFZ- /Führerscheinangelegenheiten",
   "sid": 93356,
-  "s": "Internationale Führerscheine ausstellen"
+  "s": "Internationale Führerscheine ausstellen",
+  "duration": 12
  },
  {
   "sgid": 46564,
   "sg": "KFZ- /Führerscheinangelegenheiten",
   "sid": 93357,
-  "s": "Außerbetriebssetzung eines Fahrzeugs (Kraftfahrzeug vorübergehend abmelden)"
+  "s": "Außerbetriebssetzung eines Fahrzeugs (Kraftfahrzeug vorübergehend abmelden)",
+  "duration": 10
  },
  {
   "sgid": 47606,
   "sg": "Fundsachenangelegenheiten",
   "sid": 93366,
-  "s": "Entgegennahme von Fundsachen"
+  "s": "Entgegennahme von Fundsachen",
+  "duration": 20
  },
  {
   "sgid": 47606,
   "sg": "Fundsachenangelegenheiten",
   "sid": 93367,
-  "s": "Aushändigung von Fundsachen"
+  "s": "Aushändigung von Fundsachen",
+  "duration": 15
  },
  {
   "sgid": 47606,
   "sg": "Fundsachenangelegenheiten",
   "sid": 93368,
-  "s": "Auskünfte (mündlich/schriftlich)"
+  "s": "Auskünfte (mündlich/schriftlich)",
+  "duration": 15
  },
  {
   "sgid": 47608,
   "sg": "Weitere Dienstleistungen",
   "sid": 93369,
-  "s": "Beglaubigungen von Kopien oder Unterschriften"
+  "s": "Beglaubigungen von Kopien oder Unterschriften",
+  "duration": 5
  },
  {
   "sgid": 47608,
   "sg": "Weitere Dienstleistungen",
   "sid": 93370,
-  "s": "Fischereischeine"
+  "s": "Fischereischeine",
+  "duration": 8
  },
  {
   "sgid": 47608,
   "sg": "Weitere Dienstleistungen",
   "sid": 93371,
-  "s": "\"Mein Ticket\""
+  "s": "\"Mein Ticket\"",
+  "duration": 6
  },
  {
   "sgid": 47608,
   "sg": "Weitere Dienstleistungen",
   "sid": 93372,
-  "s": "Schwerbehindertenausweise (nur Verlängerung)"
+  "s": "Schwerbehindertenausweise (nur Verlängerung)",
+  "duration": 5
  },
  {
   "sgid": 47608,
   "sg": "Weitere Dienstleistungen",
   "sid": 93373,
-  "s": "Verkauf von Abfallsäcken"
+  "s": "Verkauf von Abfallsäcken",
+  "duration": 5
  },
  {
   "sgid": 47608,
   "sg": "Weitere Dienstleistungen",
   "sid": 93374,
-  "s": "Zahlstelle"
+  "s": "Zahlstelle",
+  "duration": 10
  },
  {
   "sgid": 47608,
   "sg": "Weitere Dienstleistungen",
   "sid": 93375,
-  "s": "Untersuchungsberechtigungsscheine"
+  "s": "Untersuchungsberechtigungsscheine",
+  "duration": 5
  }
 ]
