@@ -98,14 +98,48 @@ def get_pending_users():
 
     return users
 
-def get_active_search(user_id):
-    """Holt die aktive Suche eines Nutzers."""
+MAX_ACTIVE_SEARCHES = 5
+
+
+def get_active_searches(user_id):
+    """Alle aktiven Suchen eines Nutzers, älteste zuerst."""
     connection = get_connection()
     cursor = connection.cursor()
 
     cursor.execute(
-        'SELECT * FROM searches WHERE user_id = ? AND is_active = 1',
+        'SELECT * FROM searches WHERE user_id = ? AND is_active = 1 ORDER BY id',
         (user_id,)
+    )
+
+    searches = cursor.fetchall()
+    connection.close()
+
+    return searches
+
+
+def get_search(search_id):
+    """Holt eine Suche anhand ihrer ID."""
+    connection = get_connection()
+    cursor = connection.cursor()
+
+    cursor.execute('SELECT * FROM searches WHERE id = ?', (search_id,))
+
+    search = cursor.fetchone()
+    connection.close()
+
+    return search
+
+
+def find_duplicate_search(user_id, service_key, mode, target_date, location):
+    """Gibt eine identische aktive Suche zurück, falls vorhanden."""
+    connection = get_connection()
+    cursor = connection.cursor()
+
+    cursor.execute(
+        '''SELECT * FROM searches
+        WHERE user_id = ? AND is_active = 1 AND search_type = ? AND mode = ?
+          AND target_date IS ? AND location IS ?''',
+        (user_id, service_key, mode, target_date, location)
     )
 
     search = cursor.fetchone()
@@ -113,13 +147,16 @@ def get_active_search(user_id):
 
     return search
 
-def create_search(user_id, search_type, target_date=None):
+
+def create_search(user_id, service_key, mode, target_date=None, location=None, state=None):
+    """Legt eine Suche an. target_date als YYYY-MM-DD, state als dict."""
     connection = get_connection()
     cursor = connection.cursor()
 
     cursor.execute(
-        'INSERT INTO searches (user_id, search_type, target_date) VALUES (?, ?, ?)',
-        (user_id, search_type, target_date)
+        '''INSERT INTO searches (user_id, search_type, mode, target_date, location, state)
+        VALUES (?, ?, ?, ?, ?, ?)''',
+        (user_id, service_key, mode, target_date, location, json.dumps(state or {}))
     )
 
     connection.commit()
@@ -127,6 +164,29 @@ def create_search(user_id, search_type, target_date=None):
     connection.close()
 
     return search_id
+
+
+def update_search_state(search_id, state: dict):
+    """Speichert den Auswertungszustand einer Suche als JSON."""
+    connection = get_connection()
+    cursor = connection.cursor()
+
+    cursor.execute(
+        'UPDATE searches SET state = ? WHERE id = ?',
+        (json.dumps(state), search_id)
+    )
+
+    connection.commit()
+    connection.close()
+
+
+def load_state(search) -> dict:
+    """Liest den gespeicherten Zustand; kaputte oder fehlende Werte → {}."""
+    try:
+        state = json.loads(search['state'] or '{}')
+    except (TypeError, ValueError):
+        return {}
+    return state if isinstance(state, dict) else {}
 
 
 def deactivate_search(search_id):
@@ -143,8 +203,25 @@ def deactivate_search(search_id):
     connection.close()
 
 
+def deactivate_all_searches(user_id):
+    """Beendet alle aktiven Suchen eines Nutzers und gibt die Anzahl zurück."""
+    connection = get_connection()
+    cursor = connection.cursor()
+
+    cursor.execute(
+        'UPDATE searches SET is_active = 0 WHERE user_id = ? AND is_active = 1',
+        (user_id,)
+    )
+
+    connection.commit()
+    count = cursor.rowcount
+    connection.close()
+
+    return count
+
+
 def get_all_active_searches():
-    """Gibt alle aktiven Suchen zurück (inkl. Nutzerdaten)."""
+    """Gibt alle aktiven Suchen zurück (inkl. Telegram-ID des Nutzers)."""
     connection = get_connection()
     cursor = connection.cursor()
 
@@ -159,20 +236,6 @@ def get_all_active_searches():
     connection.close()
 
     return searches
-
-
-def update_last_known_dates(search_id, dates: list):
-    """Speichert die zuletzt bekannten verfügbaren Termine als JSON."""
-    connection = get_connection()
-    cursor = connection.cursor()
-
-    cursor.execute(
-        'UPDATE searches SET last_known_dates = ? WHERE id = ?',
-        (json.dumps(dates), search_id)
-    )
-
-    connection.commit()
-    connection.close()
 
 
 def log_error(error_message, user_id=None):

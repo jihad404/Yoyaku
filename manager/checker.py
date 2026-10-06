@@ -1,192 +1,167 @@
-import asyncio
-import json
 from datetime import date, datetime
 
+from telegram import InlineKeyboardButton, InlineKeyboardMarkup
 from telegram.error import Forbidden, TelegramError
 
+from config import ADMIN_ID
 from database.models import (
-    get_all_active_searches, deactivate_search, update_last_known_dates, log_error,
+    deactivate_all_searches, deactivate_search, get_all_active_searches, load_state, log_error,
+    update_search_state,
 )
-from scrapers.registry import category_for_scraper, fetch_availability
+from manager.evaluate import evaluate
+from manager.messages import notification_text
+from scrapers import registry
+from scrapers.catalog import SERVICES, SITES, booking_url
+from scrapers.etermin import EterminError
 
-# Intervall in Sekunden (alle 5 Minuten prüfen)
-CHECK_INTERVAL = 300
+# Intervall in Sekunden
+CHECK_INTERVAL = 180
 
 # Ein leeres Ergebnis, obwohl vorher Termine bekannt waren, ist oft nur ein
-# Ladefehler der Seite. Erst nach so vielen leeren Läufen in Folge melden wir
-# "alle Termine weg".
+# Ladefehler. Erst nach so vielen leeren Abfragen in Folge wird es übernommen.
 EMPTY_RUNS_BEFORE_REMOVAL = 2
 
+# Nach so vielen fehlgeschlagenen Runden einer Buchungsseite wird der Admin informiert
+FAILURE_ALERT_ROUNDS = 3
+
 _empty_streak: dict[str, int] = {}
+_site_failures: dict[str, int] = {}
+_site_alerted: set[str] = set()
 
 
-def _format_date(date_str: str) -> str:
-    """YYYY-MM-DD → TT.MM.JJJJ"""
-    return datetime.fromisoformat(date_str).strftime("%d.%m.%Y")
+def _keyboard(service, search_id, include_stop=True):
+    buttons = [InlineKeyboardButton("Jetzt buchen ↗", url=booking_url(service))]
+    if include_stop:
+        buttons.append(InlineKeyboardButton("Suche beenden", callback_data=f"stop:{search_id}"))
+    return InlineKeyboardMarkup([buttons])
 
 
-async def _send(context, search, text) -> None:
+async def send_to_user(context, search, text, reply_markup=None) -> None:
     """Sendet eine Nachricht; Fehler brechen die Prüfrunde nicht ab."""
     try:
-        await context.bot.send_message(chat_id=search['telegram_id'], text=text)
+        await context.bot.send_message(chat_id=search['telegram_id'], text=text, reply_markup=reply_markup)
     except Forbidden:
-        # Nutzer hat den Bot blockiert → Suche beenden
-        deactivate_search(search['id'])
-        log_error(f"Bot blockiert, Suche {search['id']} beendet", search['user_id'])
+        # Nutzer hat den Bot blockiert → alle seine Suchen beenden
+        deactivate_all_searches(search['user_id'])
+        log_error(f"Bot blockiert, Suchen von Nutzer {search['user_id']} beendet", search['user_id'])
     except TelegramError as e:
         log_error(f"Senden fehlgeschlagen (Suche {search['id']}): {e}", search['user_id'])
 
 
-async def _get_results(scraper_names) -> dict:
-    """Ruft jeden Scraper einmal pro Runde ab. Fehlgeschlagene fehlen im Ergebnis."""
-    results = {}
-    for name in scraper_names:
-        try:
-            result = await asyncio.to_thread(fetch_availability, name)
-        except Exception as e:
-            print(f"  Scraper-Fehler ({name}): {e}")
-            log_error(f"Scraper {name}: {e!r}")
-            continue
+async def _notify_admin(context, text) -> None:
+    try:
+        await context.bot.send_message(chat_id=ADMIN_ID, text=text)
+    except TelegramError as e:
+        log_error(f"Admin-Nachricht fehlgeschlagen: {e}")
 
-        dates = set(result["available_dates"])
-        if dates:
-            _empty_streak[name] = 0
-        else:
-            _empty_streak[name] = _empty_streak.get(name, 0) + 1
-        results[name] = dates
+
+async def _update_site_health(context, ok_sites: set, failed_sites: set) -> None:
+    for site in failed_sites - ok_sites:
+        _site_failures[site] = _site_failures.get(site, 0) + 1
+        if _site_failures[site] >= FAILURE_ALERT_ROUNDS and site not in _site_alerted:
+            _site_alerted.add(site)
+            await _notify_admin(context, (
+                f"⚠️ eTermin-Abfrage für {SITES[site].name} schlägt seit {_site_failures[site]} Runden fehl.\n"
+                "Details stehen in error_logs. Möglicherweise hat sich die Schnittstelle geändert."
+            ))
+    for site in ok_sites:
+        _site_failures[site] = 0
+        if site in _site_alerted:
+            _site_alerted.discard(site)
+            await _notify_admin(context, f"✅ eTermin-Abfrage für {SITES[site].name} funktioniert wieder.")
+
+
+async def _fetch_all(context, availability, service_keys) -> dict:
+    """Fragt jede Dienstleistung einmal ab. Fehlgeschlagene fehlen im Ergebnis."""
+    results = {}
+    ok_sites, failed_sites = set(), set()
+    for key in sorted(service_keys):
+        service = SERVICES[key]
+        try:
+            days = await availability.days(service)
+        except EterminError as e:
+            print(f"  eTermin-Fehler ({key}): {e}")
+            log_error(f"eTermin {key}: {e}")
+            failed_sites.add(service.site)
+            continue
+        ok_sites.add(service.site)
+        _empty_streak[key] = 0 if days else _empty_streak.get(key, 0) + 1
+        results[key] = days
+    await _update_site_health(context, ok_sites, failed_sites)
     return results
 
 
-async def check_and_notify(context):
-    """
-    PTB JobQueue-Funktion: Prüft alle aktiven Suchen auf Änderungen
-    und benachrichtigt Nutzer bei neuen oder weggefallenen Terminen.
-    """
-    print(f"[{datetime.now().strftime('%H:%M:%S')}] Checker läuft...")
+async def _candidate_days(availability, service, mode, target, location, days, today) -> list[date]:
+    if mode == "earliest":
+        return await availability.matching_days(service, location, [d for d in days if d >= today], limit=1)
+    if mode == "until":
+        return await availability.matching_days(service, location, [d for d in days if today <= d <= target])
+    return await availability.matching_days(service, location, [target] if target in days else [])
+
+
+async def check_search(context, availability, search, results: dict, now: datetime) -> None:
+    service = SERVICES.get(search['search_type'])
+    if service is None:
+        return  # Dienstleistung nicht mehr im Katalog; der Katalogabgleich informiert
+
+    mode = search['mode'] or 'earliest'
+    target = date.fromisoformat(search['target_date']) if search['target_date'] else None
+    location = search['location']
+    state = load_state(search)
+    today = now.date()
+
+    if mode in ("until", "day") and target < today:
+        decision = evaluate(mode, target, state, [], now)
+    else:
+        if search['search_type'] not in results:
+            return  # Abfrage in dieser Runde fehlgeschlagen
+        days = results[search['search_type']]
+        had_days = state.get("known") or state.get("earliest") or state.get("day_available")
+        if not days and had_days and _empty_streak.get(service.key, 0) < EMPTY_RUNS_BEFORE_REMOVAL:
+            return  # vermutlich Ladefehler, nächste Runde abwarten
+        try:
+            matching = await _candidate_days(availability, service, mode, target, location, days, today)
+        except EterminError as e:
+            log_error(f"eTermin Zeitfenster {service.key}: {e}", search['user_id'])
+            return
+        decision = evaluate(mode, target, state, matching, now)
+
+    update_search_state(search['id'], decision.state)
+    if decision.end:
+        deactivate_search(search['id'])
+    if not decision.kind:
+        return
+
+    slots_by_day = {}
+    if decision.kind in ("earlier", "new_days", "day_available"):
+        for day in decision.days[:5]:
+            try:
+                slots_by_day[day] = await availability.slots(service, day, location)
+            except EterminError:
+                pass  # Nachricht kommt dann ohne Uhrzeiten
+
+    text = notification_text(service, location, decision, target, slots_by_day)
+    markup = None if decision.end else _keyboard(service, search['id'])
+    await send_to_user(context, search, text, markup)
+
+
+async def check_and_notify(context, availability=None, now: datetime | None = None):
+    """PTB-JobQueue-Funktion: prüft alle aktiven Suchen und benachrichtigt bei Änderungen."""
+    availability = availability or registry.availability
+    now = now or datetime.now()
+    print(f"[{now:%H:%M:%S}] Checker läuft...")
 
     searches = get_all_active_searches()
-
     if not searches:
         print("  Keine aktiven Suchen.")
         return
 
-    print(f"  {len(searches)} aktive Suche(n) gefunden.")
+    service_keys = {s['search_type'] for s in searches if s['search_type'] in SERVICES}
+    print(f"  {len(searches)} aktive Suche(n), {len(service_keys)} Dienstleistung(en).")
+    results = await _fetch_all(context, availability, service_keys)
 
-    # Abgelaufene Wunschdaten zuerst beenden
-    remaining = []
     for search in searches:
-        target_str = search['target_date']
-        if target_str:
-            try:
-                expired = date.fromisoformat(target_str) < date.today()
-            except ValueError:
-                log_error(f"Ungültiges Wunschdatum in Suche {search['id']}: {target_str}", search['user_id'])
-                continue
-            if expired:
-                deactivate_search(search['id'])
-                await _send(context, search, (
-                    "Suche beendet.\n\n"
-                    f"Dein Wunschtermin am {_format_date(target_str)} "
-                    "liegt inzwischen in der Vergangenheit.\n"
-                    "Starte eine neue Suche mit /search."
-                ))
-                continue
-        remaining.append(search)
-
-    results = await _get_results({s['search_type'] for s in remaining})
-
-    for search in remaining:
-        scraper_name = search['search_type']
-        if scraper_name not in results:
-            continue
-        current_dates = results[scraper_name]
-
         try:
-            last_known = set(json.loads(search['last_known_dates'])) if search['last_known_dates'] else None
-        except (TypeError, json.JSONDecodeError):
-            last_known = None
-
-        cat = category_for_scraper(scraper_name) or {}
-
-        # Erste Prüfung: aktuellen Stand speichern und sofort melden
-        if last_known is None:
-            update_last_known_dates(search['id'], sorted(current_dates))
-            await _notify_initial(context, search, current_dates, cat)
-            continue
-
-        # Vermutlicher Ladefehler: leeres Ergebnis noch nicht übernehmen
-        if not current_dates and last_known and _empty_streak.get(scraper_name, 0) < EMPTY_RUNS_BEFORE_REMOVAL:
-            continue
-
-        new_dates = current_dates - last_known
-        removed_dates = last_known - current_dates
-
-        if not new_dates and not removed_dates:
-            continue
-
-        update_last_known_dates(search['id'], sorted(current_dates))
-
-        if search['target_date']:
-            await _notify_target_date(context, search, new_dates, removed_dates, cat)
-        else:
-            await _notify_general(context, search, new_dates, removed_dates, cat)
-
-
-def _available_text(target_str, cat) -> str:
-    text = (
-        "Termin verfügbar!\n\n"
-        f"Behörde: {cat.get('name', '')}\n"
-        f"Dienstleistung: {cat.get('service_name', '')}\n"
-        f"Datum: {_format_date(target_str)}\n\n"
-    )
-    if cat.get('booking_url'):
-        text += f"Jetzt buchen: {cat['booking_url']}\n\n"
-    return text + "Die Suche läuft weiter und meldet erneut falls sich etwas ändert."
-
-
-async def _notify_initial(context, search, current_dates, cat):
-    """Meldet den Stand bei der ersten Prüfung einer neuen Suche."""
-    target_str = search['target_date']
-    if target_str:
-        if target_str in current_dates:
-            await _send(context, search, _available_text(target_str, cat))
-        return
-
-    if current_dates:
-        await _notify_general(context, search, current_dates, set(), cat, title="Aktuell verfügbar")
-
-
-async def _notify_target_date(context, search, new_dates, removed_dates, cat):
-    """Benachrichtigt bei Änderungen am Wunschdatum."""
-    target_str = search['target_date']
-    if target_str in new_dates:
-        await _send(context, search, _available_text(target_str, cat))
-    elif target_str in removed_dates:
-        await _send(context, search, (
-            "Termin nicht mehr verfügbar.\n\n"
-            f"Dein Wunschtermin am {_format_date(target_str)} "
-            "ist leider nicht mehr buchbar.\n"
-            "Die Suche läuft weiter."
-        ))
-
-
-async def _notify_general(context, search, new_dates, removed_dates, cat, title="Terminänderung"):
-    """Benachrichtigt über alle Terminänderungen."""
-    lines = [f"{title} — {cat.get('service_name', search['search_type'])}:\n"]
-
-    if new_dates:
-        lines.append("Neu verfügbar:")
-        for d in sorted(new_dates):
-            lines.append(f"  + {_format_date(d)}")
-
-    if removed_dates:
-        if new_dates:
-            lines.append("")
-        lines.append("Nicht mehr verfügbar:")
-        for d in sorted(removed_dates):
-            lines.append(f"  - {_format_date(d)}")
-
-    if new_dates and cat.get('booking_url'):
-        lines.append(f"\nJetzt buchen: {cat['booking_url']}")
-
-    await _send(context, search, "\n".join(lines))
+            await check_search(context, availability, search, results, now)
+        except Exception as e:  # eine kaputte Suche darf die Runde nicht stoppen
+            log_error(f"Checker Suche {search['id']}: {e!r}", search['user_id'])

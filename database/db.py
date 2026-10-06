@@ -48,7 +48,25 @@ def init_db():
         cursor.execute('ALTER TABLE searches ADD COLUMN last_known_dates TEXT')
     except Exception:
         pass
-    
+    try:
+        cursor.execute("ALTER TABLE searches ADD COLUMN mode TEXT NOT NULL DEFAULT 'earliest'")
+        # Einmalig beim Hinzufügen: alte Suchen mit Wunschdatum → Modus "day"
+        cursor.execute("UPDATE searches SET mode = 'day' WHERE target_date IS NOT NULL")
+    except Exception:
+        pass
+    try:
+        cursor.execute('ALTER TABLE searches ADD COLUMN location TEXT')
+    except Exception:
+        pass
+    try:
+        cursor.execute('ALTER TABLE searches ADD COLUMN state TEXT')
+    except Exception:
+        pass
+
+    # Alte Scraper-Namen auf Katalog-Schlüssel umstellen
+    cursor.execute("UPDATE searches SET search_type = 'wiederzulassung' WHERE search_type = 'duisburg_zulassung'")
+    cursor.execute("UPDATE searches SET is_active = 0 WHERE search_type = 'duisburg_aufenthalt'")
+
     # Error Logs Tabelle
     cursor.execute('''
         CREATE TABLE IF NOT EXISTS error_logs (
