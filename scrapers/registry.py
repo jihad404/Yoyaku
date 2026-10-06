@@ -12,17 +12,17 @@ from scrapers import etermin
 from scrapers.catalog import SITES, Service, location_for_calendar
 
 CACHE_TTL = 60
-# Kleine Pause nach jeder echten Anfrage, um eTermin nicht zu fluten
-REQUEST_PAUSE = 0.3
+# Höchstens so viele gleichzeitige Anfragen an eTermin (schont den Server,
+# ist aber deutlich schneller als strikt nacheinander)
+MAX_PARALLEL = 4
 
 
 class Availability:
-    def __init__(self, client_factory=etermin.make_client, ttl: float = CACHE_TTL,
-                 pause: float = REQUEST_PAUSE):
+    def __init__(self, client_factory=etermin.make_client, ttl: float = CACHE_TTL):
         self._client_factory = client_factory
         self._client = None
         self._ttl = ttl
-        self._pause = pause
+        self._semaphore = asyncio.Semaphore(MAX_PARALLEL)
         self._cache: dict = {}
         self._locks: dict = {}
 
@@ -42,11 +42,8 @@ class Availability:
             hit = self._cache.get(key)
             if hit and time.monotonic() - hit[0] < self._ttl:
                 return hit[1]
-            try:
+            async with self._semaphore:
                 value = await fetch()
-            finally:
-                if self._pause:
-                    await asyncio.sleep(self._pause)
             self._cache[key] = (time.monotonic(), value)
             return value
 
@@ -76,11 +73,13 @@ class Availability:
         if not location:
             return days[:limit] if limit else days
         result = []
-        for day in days:
-            if await self.slots(service, day, location):
-                result.append(day)
-                if limit and len(result) >= limit:
-                    break
+        # In Blöcken parallel abfragen; nach jedem Block prüfen, ob das Limit erreicht ist
+        for i in range(0, len(days), MAX_PARALLEL):
+            block = days[i:i + MAX_PARALLEL]
+            found = await asyncio.gather(*(self.slots(service, day, location) for day in block))
+            result += [day for day, slots in zip(block, found) if slots]
+            if limit and len(result) >= limit:
+                return result[:limit]
         return result
 
 

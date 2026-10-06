@@ -1,15 +1,18 @@
 """Aktive Suchen anzeigen (/status) und beenden (/stop)."""
+import logging
 from datetime import date
 
 from telegram import InlineKeyboardButton, InlineKeyboardMarkup, Update
 from telegram.ext import ContextTypes
 
-from bot.search_flow import approved_user, edit_message, current_view
+from bot.search_flow import answer_query, approved_user, current_view, edit_message
 from database.models import (
     MAX_ACTIVE_SEARCHES, deactivate_all_searches, deactivate_search, get_active_searches, get_search,
 )
 from manager.messages import status_text
 from scrapers.catalog import LOCATIONS, SERVICES, booking_url
+
+logger = logging.getLogger(__name__)
 
 SHORT_MODE = {"earliest": "⚡", "until": "📅", "day": "🎯"}
 
@@ -88,9 +91,9 @@ async def on_show(update: Update, context: ContextTypes.DEFAULT_TYPE):
     search = _own_active_search(user, query.data) if user else None
     service = SERVICES.get(search['search_type']) if search else None
     if not service:
-        await query.answer("Diese Suche ist nicht mehr aktiv.", show_alert=True)
+        await answer_query(query, "Diese Suche ist nicht mehr aktiv.", show_alert=True)
         return
-    await query.answer("Einen Moment …")
+    await answer_query(query, "Einen Moment …")
 
     target = date.fromisoformat(search['target_date']) if search['target_date'] else None
     view = await current_view(service, search['location'], search['mode'], target)
@@ -112,9 +115,9 @@ async def on_list(update: Update, context: ContextTypes.DEFAULT_TYPE):
     query = update.callback_query
     user = approved_user(update)
     if not user:
-        await query.answer("Du bist nicht freigeschaltet.", show_alert=True)
+        await answer_query(query, "Du bist nicht freigeschaltet.", show_alert=True)
         return
-    await query.answer()
+    await answer_query(query)
     searches = get_active_searches(user['id'])
     if not searches:
         await edit_message(query, NO_SEARCHES)
@@ -128,10 +131,11 @@ async def on_stop(update: Update, context: ContextTypes.DEFAULT_TYPE):
     user = approved_user(update)
     search = _own_active_search(user, query.data) if user else None
     if not search:
-        await query.answer("Diese Suche ist bereits beendet.")
+        await answer_query(query, "Diese Suche ist bereits beendet.")
         return
     deactivate_search(search['id'])
-    await query.answer("Suche beendet.")
+    logger.info("Suche %s von Nutzer %s beendet", search['id'], user['id'])
+    await answer_query(query, "Suche beendet.")
 
     if query.data.startswith("stopl:"):
         remaining = get_active_searches(user['id'])
@@ -150,8 +154,9 @@ async def on_stop_all(update: Update, context: ContextTypes.DEFAULT_TYPE):
     query = update.callback_query
     user = approved_user(update)
     if not user:
-        await query.answer("Du bist nicht freigeschaltet.", show_alert=True)
+        await answer_query(query, "Du bist nicht freigeschaltet.", show_alert=True)
         return
     count = deactivate_all_searches(user['id'])
-    await query.answer("Alle Suchen beendet.")
+    logger.info("Alle %s Suche(n) von Nutzer %s beendet", count, user['id'])
+    await answer_query(query, "Alle Suchen beendet.")
     await edit_message(query, f"⏹ {count} Suche(n) beendet.\nStarte eine neue mit /search.")

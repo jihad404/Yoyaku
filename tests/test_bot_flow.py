@@ -105,7 +105,8 @@ def test_day_mode_with_typed_date(user, ctx, fake_availability):
     assert "Vergangenheit" in msg.replies[0][0]
 
     msg = send(search_flow.on_text, 100, IN(10).strftime("%d.%m.%Y"), ctx)
-    assert "Suche gestartet" in msg.replies[0][0]
+    assert msg.replies[0][0].startswith("⏳")
+    assert "Suche gestartet" in msg.replies[-1][0]
     [search] = get_active_searches(user['id'])
     assert search['mode'] == "day" and search['target_date'] == IN(10).isoformat() and search['location'] is None
 
@@ -146,6 +147,33 @@ def test_stale_buttons(user, ctx):
     q = click(search_flow.on_mode, 100, "mode:earliest", ctx)   # kein Entwurf
     assert "abgelaufen" in q.edits[0][0]
     q = click(search_flow.on_navigation, 100, "nav:t:quatsch", ctx)
+    assert "abgelaufen" in q.edits[0][0]
+
+
+def test_double_click_creates_only_one_search(user, ctx, fake_availability):
+    """Zwei gleichzeitige Klicks auf denselben Modus-Button (Updates laufen parallel)."""
+    click(search_flow.on_service, 100, "svc:wiederzulassung", ctx)
+
+    async def both():
+        await asyncio.gather(
+            search_flow.on_mode(FakeUpdate(100, data="mode:earliest"), ctx),
+            search_flow.on_mode(FakeUpdate(100, data="mode:earliest"), ctx),
+        )
+    run(both())
+    assert len(get_active_searches(user['id'])) == 1
+
+
+def test_too_old_query_does_not_abort_handler(user, ctx, monkeypatch):
+    from conftest import FakeQuery
+    from telegram.error import BadRequest
+
+    async def too_old(self, text=None, show_alert=False):
+        raise BadRequest("Query is too old and response timeout expired or query id is invalid")
+    monkeypatch.setattr(FakeQuery, "answer", too_old)
+
+    q = click(search_flow.on_service, 100, "svc:wiederzulassung", ctx)
+    assert "mode:earliest" in callback_datas(q.edits[0][1])   # Handler lief trotzdem weiter
+    q = click(search_flow.on_service, 100, "svc:gibt_es_nicht", ctx)
     assert "abgelaufen" in q.edits[0][0]
 
 

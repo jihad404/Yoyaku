@@ -1,9 +1,13 @@
 """Täglicher Abgleich des Katalogs mit den Dienstleistungen auf eTermin."""
+import logging
+
 from config import ADMIN_ID
 from database.models import get_all_active_searches, load_state, log_error, update_search_state
 from manager.checker import send_to_user
 from scrapers import etermin
 from scrapers.catalog import SERVICES, SITES, known_sids, service_label
+
+logger = logging.getLogger(__name__)
 
 
 async def compare_catalog(client) -> tuple[list[str], set[str]]:
@@ -37,7 +41,10 @@ async def sync_catalog(context, client_factory=etermin.make_client) -> None:
     async with client_factory() as client:
         lines, gone_keys = await compare_catalog(client)
 
-    if lines:
+    if not lines:
+        logger.info("Katalogabgleich: keine Abweichungen")
+    else:
+        logger.warning("Katalogabgleich: %s Abweichung(en): %s", len(lines), "; ".join(lines))
         text = "📋 Katalogabgleich mit eTermin:\n\n" + "\n".join(lines) + \
                "\n\nBitte scrapers/catalog.py anpassen."
         try:

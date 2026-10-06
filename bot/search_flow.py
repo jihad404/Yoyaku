@@ -3,6 +3,8 @@
 Alle Schritte bearbeiten dieselbe Nachricht. Der Zwischenstand liegt in
 context.user_data["draft"], ein erwartetes Datum in context.user_data["awaiting"].
 """
+import asyncio
+import logging
 from datetime import date, datetime, timedelta
 
 from telegram import InlineKeyboardButton, InlineKeyboardMarkup, Update
@@ -20,6 +22,8 @@ from scrapers.catalog import (
     LOCATIONS, SERVICES, SITES, TOPICS, booking_url, search as search_catalog, service_label, services_in,
 )
 from scrapers.etermin import EterminError
+
+logger = logging.getLogger(__name__)
 
 DATE_HINT_DAYS = 14
 MAX_DAYS_AHEAD = 365
@@ -46,6 +50,16 @@ def _back(data):
     return [InlineKeyboardButton("« Zurück", callback_data=data)]
 
 
+async def answer_query(query, text=None, show_alert=False):
+    """Bestätigt einen Button-Klick. Ist der Klick zu alt (Telegram erlaubt nur
+    ~15 s), ist das kein Grund, den Handler abzubrechen – die Nachricht wird
+    trotzdem bearbeitet."""
+    try:
+        await query.answer(text, show_alert=show_alert)
+    except BadRequest as e:
+        logger.info("Button-Klick nicht mehr bestätigbar: %s", e)
+
+
 async def edit_message(query, text, markup=None):
     try:
         await query.edit_message_text(text, reply_markup=markup)
@@ -55,7 +69,7 @@ async def edit_message(query, text, markup=None):
 
 
 async def _expired(query):
-    await query.answer()
+    await answer_query(query)
     await edit_message(query, "Diese Auswahl ist abgelaufen. Starte neu mit /search.")
 
 
@@ -145,9 +159,9 @@ async def search_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
 async def on_navigation(update: Update, context: ContextTypes.DEFAULT_TYPE):
     query = update.callback_query
     if not approved_user(update):
-        await query.answer("Du bist nicht freigeschaltet.", show_alert=True)
+        await answer_query(query, "Du bist nicht freigeschaltet.", show_alert=True)
         return
-    await query.answer()
+    await answer_query(query)
     context.user_data.pop("awaiting", None)
     parts = query.data.split(":")
 
@@ -182,13 +196,13 @@ async def on_navigation(update: Update, context: ContextTypes.DEFAULT_TYPE):
 async def on_service(update: Update, context: ContextTypes.DEFAULT_TYPE):
     query = update.callback_query
     if not approved_user(update):
-        await query.answer("Du bist nicht freigeschaltet.", show_alert=True)
+        await answer_query(query, "Du bist nicht freigeschaltet.", show_alert=True)
         return
     service = SERVICES.get(query.data.split(":", 1)[1])
     if service is None:
         await _expired(query)
         return
-    await query.answer()
+    await answer_query(query)
     context.user_data.pop("awaiting", None)
     context.user_data["draft"] = {"service": service.key, "location": None}
 
@@ -207,7 +221,7 @@ async def on_location(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if not approved_user(update) or not draft or (location != "any" and location not in LOCATIONS):
         await _expired(query)
         return
-    await query.answer()
+    await answer_query(query)
     draft["location"] = None if location == "any" else location
     await edit_message(query, f"{_draft_header(draft)}\n\nWelche Termine soll ich melden?",
                 mode_keyboard(SERVICES[draft["service"]]))
@@ -224,18 +238,18 @@ async def on_mode(update: Update, context: ContextTypes.DEFAULT_TYPE):
     context.user_data.pop("awaiting", None)
 
     if mode == "back":
-        await query.answer()
+        await answer_query(query)
         await edit_message(query, f"{_draft_header(draft)}\n\nWelche Termine soll ich melden?",
                     mode_keyboard(SERVICES[draft["service"]]))
     elif mode == "earliest":
-        await query.answer()
+        await answer_query(query)
         await create_from_draft(context, user, "earliest", None, lambda t, m: edit_message(query, t, m))
     elif mode == "until":
-        await query.answer()
+        await answer_query(query)
         await edit_message(query, f"{_draft_header(draft)}\n\nBis wann brauchst du den Termin spätestens?",
                     until_keyboard())
     elif mode == "day":
-        await query.answer()
+        await answer_query(query)
         context.user_data["awaiting"] = "day"
         await edit_message(query, f"{_draft_header(draft)}\n\nSchick mir den gewünschten Tag als Nachricht, "
                            f"z. B. {_example_date()}", InlineKeyboardMarkup([_back("mode:back")]))
@@ -250,7 +264,7 @@ async def on_until(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if not user or not draft:
         await _expired(query)
         return
-    await query.answer()
+    await answer_query(query)
     choice = query.data.split(":", 1)[1]
     if choice == "input":
         context.user_data["awaiting"] = "until"
@@ -300,8 +314,16 @@ async def _handle_date_input(update, context, user, awaiting, text):
     if target > date.today() + timedelta(days=MAX_DAYS_AHEAD):
         await update.message.reply_text("Bitte ein Datum innerhalb der nächsten 12 Monate wählen.")
         return
-    await create_from_draft(context, user, awaiting, target,
-                            lambda t, m: update.message.reply_text(t, reply_markup=m))
+    sent = []
+
+    async def respond(text, markup):
+        # Erste Antwort als neue Nachricht, weitere (Ergebnis nach "⏳") als Bearbeitung
+        if sent:
+            await sent[0].edit_text(text, reply_markup=markup)
+        else:
+            sent.append(await update.message.reply_text(text, reply_markup=markup))
+
+    await create_from_draft(context, user, awaiting, target, respond)
 
 
 # ---------------------------------------------------------------------------
@@ -324,7 +346,8 @@ async def current_view(service, location, mode, target, availability=None):
         matching = await availability.matching_days(service, location, candidates,
                                                     limit=None if mode == "until" else 5)
         shown = matching[:5]
-        slots_by_day = {d: await availability.slots(service, d, location) for d in shown}
+        slots = await asyncio.gather(*(availability.slots(service, d, location) for d in shown))
+        slots_by_day = dict(zip(shown, slots))
     except EterminError as e:
         log_error(f"Anzeige {service.key}: {e}")
         return None
@@ -332,7 +355,9 @@ async def current_view(service, location, mode, target, availability=None):
 
 
 async def create_from_draft(context, user, mode, target, respond):
-    draft = context.user_data.get("draft")
+    # Entwurf sofort übernehmen: ein Doppelklick während der Abfrage findet ihn nicht mehr
+    draft = context.user_data.pop("draft", None)
+    context.user_data.pop("awaiting", None)
     if not draft:
         await respond("Diese Auswahl ist abgelaufen. Starte neu mit /search.", None)
         return
@@ -348,6 +373,7 @@ async def create_from_draft(context, user, mode, target, respond):
         await respond("Genau diese Suche läuft bereits. Den Stand siehst du mit /status.", None)
         return
 
+    await respond("⏳ Einen Moment, ich schaue nach freien Terminen …", None)
     view = await current_view(service, location, mode, target)
     if view is None:
         state = {}  # nicht initialisiert → der Checker meldet beim ersten Lauf den Stand
@@ -360,8 +386,9 @@ async def create_from_draft(context, user, mode, target, respond):
         text_body = status_text(service, location, mode, target, shown, slots_by_day, "✅ Suche gestartet")
 
     search_id = create_search(user['id'], service.key, mode, target_iso, location, state)
-    context.user_data.pop("draft", None)
-    context.user_data.pop("awaiting", None)
+    logger.info("Suche %s angelegt: Nutzer %s, %s, Modus %s, Datum %s, Standort %s, eTermin %s",
+                search_id, user['id'], service.key, mode, target_iso, location,
+                "ok" if view is not None else "nicht erreichbar")
 
     markup = InlineKeyboardMarkup([[
         InlineKeyboardButton("Jetzt buchen ↗", url=booking_url(service)),

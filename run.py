@@ -1,8 +1,15 @@
-from bot.main import main
-from database.db import init_db
+import logging
+
+from logging_setup import setup_logging
 
 if __name__ == "__main__":
-    print("Initialisiere Datenbank...")
+    setup_logging()
+    logger = logging.getLogger("yoyaku")
+
+    from bot.main import main
+    from database.db import init_db
+
+    logger.info("Initialisiere Datenbank...")
     init_db()
-    print("Datenbank bereit.")
+    logger.info("Datenbank bereit.")
     main()

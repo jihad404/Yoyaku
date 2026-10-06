@@ -1,3 +1,4 @@
+import asyncio
 import json
 import os
 import sys
@@ -60,6 +61,7 @@ class FakeAvailability:
 
     async def days(self, service):
         from scrapers.etermin import EterminError
+        await asyncio.sleep(0)  # wie echte Netzwerkabfrage: andere Aufgaben kommen dazwischen
         self.day_calls.append(service.key)
         if service.key in self.fail:
             raise EterminError("kaputt")
@@ -115,6 +117,17 @@ class FakeMessage:
 
     async def reply_text(self, text, reply_markup=None):
         self.replies.append((text, reply_markup))
+        return SentMessage(self.replies)
+
+
+class SentMessage:
+    """Vom Bot gesendete Nachricht; Bearbeitungen landen in der Antwortliste."""
+
+    def __init__(self, replies):
+        self._replies = replies
+
+    async def edit_text(self, text, reply_markup=None):
+        self._replies.append((text, reply_markup))
 
 
 class FakeQuery:

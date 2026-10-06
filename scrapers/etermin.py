@@ -3,6 +3,7 @@
 Die Buchungsseiten der Stadt Duisburg laden ihre Daten über diese Schnittstelle;
 jede Anfrage braucht den Header ``webid`` mit dem Namen der Buchungsseite.
 """
+import asyncio
 from dataclasses import dataclass
 from datetime import date, datetime
 
@@ -73,9 +74,13 @@ async def available_days(client: httpx.AsyncClient, webid: str, service_id: int,
     (``rangesearch`` liefert jeweils vom Startdatum bis Monatsende)."""
     today = today or date.today()
     days: set[date] = set()
-    for start in _month_starts(today, months):
-        params = {"date": start.isoformat(), "serviceid": str(service_id), "rangesearch": "1", **_TIMESLOT_PARAMS}
-        for entry in await _get_list(client, webid, "/api/timeslots", params):
+    responses = await asyncio.gather(*(
+        _get_list(client, webid, "/api/timeslots",
+                  {"date": start.isoformat(), "serviceid": str(service_id), "rangesearch": "1", **_TIMESLOT_PARAMS})
+        for start in _month_starts(today, months)
+    ))
+    for response in responses:
+        for entry in response:
             try:
                 days.add(datetime.fromisoformat(entry["start"]).date())
             except (KeyError, TypeError, ValueError) as e:
@@ -111,7 +116,6 @@ async def list_services(client: httpx.AsyncClient, webid: str) -> list[dict]:
 # Manuelle Live-Prüfung: python -m scrapers.etermin <katalog-schlüssel>
 # ---------------------------------------------------------------------------
 if __name__ == "__main__":
-    import asyncio
     import sys
 
     from scrapers.catalog import SERVICES, SITES
