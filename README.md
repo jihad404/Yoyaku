@@ -202,3 +202,7 @@ Design-Dokument: [docs/superpowers/specs/2026-10-06-alle-termine-design.md](docs
 - Logs enthalten nur interne Nutzer-IDs.
 - Die eTermin-Schnittstelle ist nicht offiziell dokumentiert; der Bot fragt mit
   eigenem User-Agent und höchstens 4 parallelen Anfragen.
+
+## Lizenz
+
+[MIT](LICENSE)
