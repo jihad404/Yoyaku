@@ -48,7 +48,8 @@ ihre Daten laden (kein Browser, kein Selenium).
   abgefragt, egal wie viele Suchen darauf laufen.
 - **Nur buchbare Termine:** Der Bot liest die Einstellungen jeder Buchungsseite
   (`/api/settingbs`, z. B. Buchungszeitraum, Vorlaufzeit, Freigabe-Uhrzeit) und die
-  Dauer der Dienstleistung und fragt mit genau diesen Parametern. Ohne sie liefert
+  Dauer der Dienstleistung und fragt mit genau diesen Parametern – und nur so viele
+  Monate, wie der Buchungszeitraum reicht (meist 1–2 Anfragen). Ohne sie liefert
   eTermin auch Zeiten, die online (noch) nicht buchbar sind – etwa Termine des
   Bürgerservice vor der täglichen Freigabe um 16 Uhr oder Termine der
   Fahrerlaubnisbehörde außerhalb ihres 14-Tage-Fensters.

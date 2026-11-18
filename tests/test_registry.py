@@ -56,7 +56,7 @@ def test_matching_days_fetches_in_parallel_and_keeps_order(monkeypatch):
 
 def test_requests_use_booking_page_settings_and_service_duration(monkeypatch):
     calls = {"settings": 0, "services": 0}
-    seen_params = []
+    seen_params, seen_months = [], []
 
     async def fake_settings(client, webid):
         calls["settings"] += 1
@@ -66,8 +66,9 @@ def test_requests_use_booking_page_settings_and_service_duration(monkeypatch):
         calls["services"] += 1
         return [{"sid": 90492, "name": "Anmeldungen", "group": "x", "duration": 12}]
 
-    async def fake_days(client, webid, sid, params=None):
+    async def fake_days(client, webid, sid, months=None, params=None):
         seen_params.append(params)
+        seen_months.append(months)
         return [D(15)]
 
     async def fake_slots(client, webid, sid, day, params=None):
@@ -88,6 +89,27 @@ def test_requests_use_booking_page_settings_and_service_duration(monkeypatch):
     asyncio.run(run())
     assert all(p == {"caching": "true", "appfuture": "30", "duration": "12"} for p in seen_params)
     assert calls == {"settings": 1, "services": 1}   # Einstellungen werden zwischengespeichert
+    assert seen_months == [etermin.months_ahead(date.today(), "30")]   # Monate aus dem Buchungszeitraum
+
+
+def test_prune_drops_expired_entries_and_unused_locks(monkeypatch):
+    clock = [1000.0]
+    monkeypatch.setattr(registry.time, "monotonic", lambda: clock[0])
+
+    async def fetch_value():
+        return "wert"
+
+    async def run():
+        availability = registry.Availability(client_factory=lambda: None)
+        await availability._cached("kurz", fetch_value, ttl=60)
+        await availability._cached("lang", fetch_value, ttl=6 * 60 * 60)
+        clock[0] += registry.PRUNE_INTERVAL + 1      # "kurz" ist abgelaufen, Aufräumen fällig
+        await availability._cached("neu", fetch_value, ttl=60)
+        return availability
+
+    availability = asyncio.run(run())
+    assert set(availability._cache) == {"lang", "neu"}
+    assert set(availability._locks) == {"lang", "neu"}
 
 
 def test_matching_days_without_location_needs_no_requests(monkeypatch):

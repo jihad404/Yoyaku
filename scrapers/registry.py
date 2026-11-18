@@ -14,9 +14,12 @@ from scrapers.catalog import SITES, Service, location_for_calendar
 CACHE_TTL = 60
 # Einstellungen der Buchungsseiten und Dauer der Dienstleistungen ändern sich selten
 SETTINGS_TTL = 6 * 60 * 60
-# Höchstens so viele gleichzeitige Anfragen an eTermin (schont den Server,
-# ist aber deutlich schneller als strikt nacheinander)
-MAX_PARALLEL = 4
+# Gleichzeitige Abfragen; die harte Grenze für HTTP-Anfragen setzt der Client
+# (etermin.MAX_CONNECTIONS), hier wird nur entsprechend in Blöcken gearbeitet
+MAX_PARALLEL = etermin.MAX_CONNECTIONS
+# So oft werden abgelaufene Einträge aus dem Zwischenspeicher entfernt; ohne das
+# wächst er bei monatelangem Betrieb mit jedem neuen Tag weiter
+PRUNE_INTERVAL = 10 * 60
 
 
 class Availability:
@@ -25,8 +28,9 @@ class Availability:
         self._client = None
         self._ttl = ttl
         self._semaphore = asyncio.Semaphore(MAX_PARALLEL)
-        self._cache: dict = {}
+        self._cache: dict = {}   # key → (Zeitpunkt, Wert, Gültigkeit in s)
         self._locks: dict = {}
+        self._last_prune = time.monotonic()
 
     def _get_client(self):
         if self._client is None:
@@ -47,8 +51,22 @@ class Availability:
                 return hit[1]
             async with self._semaphore:
                 value = await fetch()
-            self._cache[key] = (time.monotonic(), value)
-            return value
+            self._cache[key] = (time.monotonic(), value, ttl)
+        self.prune()
+        return value
+
+    def prune(self, force: bool = False) -> None:
+        """Entfernt abgelaufene Einträge und nicht benutzte Sperren (höchstens alle PRUNE_INTERVAL s)."""
+        now = time.monotonic()
+        if not force and now - self._last_prune < PRUNE_INTERVAL:
+            return
+        self._last_prune = now
+        for key, (stored, _, ttl) in list(self._cache.items()):
+            if now - stored >= ttl:
+                del self._cache[key]
+        for key, lock in list(self._locks.items()):
+            if key not in self._cache and not lock.locked():
+                del self._locks[key]
 
     async def _params(self, service: Service) -> dict:
         """Anfrageparameter wie auf der Buchungsseite: deren Einstellungen plus
@@ -68,9 +86,12 @@ class Availability:
         """Alle Tage mit freien Terminen (alle Standorte)."""
         site = SITES[service.site]
         params = await self._params(service)
+        # nur so viele Monate abfragen, wie die Seite im Voraus buchbar macht
+        months = etermin.months_ahead(date.today(), params.get("appfuture"))
         return await self._cached(
             ("days", site.webid, service.sid),
-            lambda: etermin.available_days(self._get_client(), site.webid, service.sid, params=params),
+            lambda: etermin.available_days(self._get_client(), site.webid, service.sid, months=months,
+                                           params=params),
         )
 
     async def slots(self, service: Service, day: date, location: str | None = None) -> list[etermin.Slot]:

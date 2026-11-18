@@ -7,13 +7,19 @@ import asyncio
 import html
 import re
 from dataclasses import dataclass
-from datetime import date, datetime
+from datetime import date, datetime, timedelta
 
 import httpx
 
 BASE_URL = "https://www.etermin.net"
 USER_AGENT = "Yoyaku-Terminbot/1.0 (privater Telegram-Benachrichtigungsdienst)"
 TIMEOUT = 15
+# Höchstens so viele gleichzeitige HTTP-Anfragen an eTermin (weitere warten auf
+# eine freie Verbindung). Schont den Server, ist aber schneller als nacheinander.
+MAX_CONNECTIONS = 4
+# Monatsabfragen, wenn die Buchungsseite keinen Buchungszeitraum angibt
+DEFAULT_MONTHS = 3
+MAX_MONTHS = 12
 
 # Grundwerte der Parameter, die auch die Buchungsseite mitschickt. Die
 # seitenspezifischen Werte (caching, Vorlauf, Zeitraum, Zeitzone) und die Dauer
@@ -64,7 +70,10 @@ class Slot:
 def make_client() -> httpx.AsyncClient:
     return httpx.AsyncClient(
         base_url=BASE_URL,
-        timeout=TIMEOUT,
+        # pool=None: Anfragen dürfen beliebig lange auf eine freie Verbindung warten,
+        # die 15 s gelten erst ab dem Senden
+        timeout=httpx.Timeout(TIMEOUT, pool=None),
+        limits=httpx.Limits(max_connections=MAX_CONNECTIONS, max_keepalive_connections=MAX_CONNECTIONS),
         headers={"User-Agent": USER_AGENT, "Accept": "application/json"},
     )
 
@@ -106,8 +115,23 @@ def _month_starts(today: date, months: int) -> list[date]:
     return starts
 
 
+def months_ahead(today: date, appfuture) -> int:
+    """Wie viele Monatsabfragen den Buchungszeitraum abdecken. ``appfuture`` ist
+    die Einstellung der Buchungsseite in Kalendertagen (live geprüft am
+    18.11.2026: letzter freier Tag = heute + appfuture)."""
+    try:
+        days = int(appfuture)
+    except (TypeError, ValueError):
+        return DEFAULT_MONTHS
+    if days <= 0:
+        return DEFAULT_MONTHS
+    last = today + timedelta(days=days)
+    return min((last.year - today.year) * 12 + last.month - today.month + 1, MAX_MONTHS)
+
+
 async def available_days(client: httpx.AsyncClient, webid: str, service_id: int,
-                         today: date | None = None, months: int = 3, params: dict | None = None) -> list[date]:
+                         today: date | None = None, months: int = DEFAULT_MONTHS,
+                         params: dict | None = None) -> list[date]:
     """Tage mit freien Terminen, sortiert. Eine Anfrage pro Monat
     (``rangesearch`` liefert jeweils vom Startdatum bis Monatsende)."""
     today = today or date.today()

@@ -38,6 +38,29 @@ def test_available_days_queries_each_month_and_merges():
     assert len(days) == 13
 
 
+@pytest.mark.parametrize("today, appfuture, months", [
+    (date(2026, 11, 18), 30, 2),     # Bürgerservice: bis 18.12.
+    (date(2026, 11, 18), "7", 1),    # Zulassungsstelle: bis 25.11.
+    (date(2026, 11, 25), 42, 3),     # Gewerbe: bis 06.01.
+    (date(2026, 12, 20), 14, 2),     # Jahreswechsel
+    (date(2026, 1, 31), 30, 3),      # 31.01. + 30 Tage = 02.03.
+    (date(2026, 11, 18), 0, etermin.DEFAULT_MONTHS),
+    (date(2026, 11, 18), None, etermin.DEFAULT_MONTHS),
+    (date(2026, 11, 18), "x", etermin.DEFAULT_MONTHS),
+    (date(2026, 11, 18), 9999, etermin.MAX_MONTHS),
+])
+def test_months_ahead_covers_booking_window(today, appfuture, months):
+    assert etermin.months_ahead(today, appfuture) == months
+
+
+def test_client_limits_parallel_requests(monkeypatch):
+    seen = {}
+    monkeypatch.setattr(etermin.httpx, "AsyncClient", lambda **kwargs: seen.update(kwargs))
+    etermin.make_client()
+    assert seen["limits"].max_connections == etermin.MAX_CONNECTIONS == 4
+    assert seen["timeout"].pool is None and seen["timeout"].read == etermin.TIMEOUT
+
+
 def test_booking_settings_mirror_the_booking_page():
     def handler(request):
         assert request.url.path == "/api/settingbs"
