@@ -1,2 +1,4 @@
-python-telegram-bot[job-queue]==20.7
+python-telegram-bot[job-queue]==22.8
+# wird von scrapers/etermin.py direkt genutzt; Version passend zu python-telegram-bot (>=0.27,<0.29)
+httpx==0.28.1
 python-dotenv==1.0.0

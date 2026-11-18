@@ -137,6 +137,7 @@ class FakeQuery:
         self.edits = []         # (text, reply_markup)
         self.markup_removed = False
         self.message = FakeMessage()
+        self.too_old = False    # alte Nachricht: Telegram lehnt Bearbeitungen ab
 
     async def answer(self, text=None, show_alert=False):
         self.answers.append(text)
@@ -145,12 +146,16 @@ class FakeQuery:
         self.edits.append((text, reply_markup))
 
     async def edit_message_reply_markup(self, reply_markup=None):
+        if self.too_old:
+            from telegram.error import BadRequest
+            raise BadRequest("Message can't be edited")
         self.markup_removed = reply_markup is None
 
 
 class FakeUpdate:
     def __init__(self, user_id, text=None, data=None):
         self.effective_user = type("U", (), {"id": user_id})()
+        self.effective_chat = type("C", (), {"id": user_id})()  # Privatchat: Chat-ID = Nutzer-ID
         self.message = FakeMessage(text) if text is not None else None
         self.callback_query = FakeQuery(data) if data is not None else None
 

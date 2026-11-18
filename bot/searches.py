@@ -3,6 +3,7 @@ import logging
 from datetime import date
 
 from telegram import InlineKeyboardButton, InlineKeyboardMarkup, Update
+from telegram.error import BadRequest
 from telegram.ext import ContextTypes
 
 from bot.search_flow import answer_query, approved_user, current_view, edit_message
@@ -145,9 +146,15 @@ async def on_stop(update: Update, context: ContextTypes.DEFAULT_TYPE):
         else:
             await edit_message(query, f"⏹ Beendet: {search_button_label(search)}\n\n{NO_SEARCHES}")
     else:
-        # Benachrichtigung stehen lassen, nur die Buttons entfernen
-        await query.edit_message_reply_markup(reply_markup=None)
-        await query.message.reply_text(f"⏹ Suche beendet: {search_button_label(search)}")
+        # Benachrichtigung stehen lassen, nur die Buttons entfernen. Bei alten Nachrichten
+        # kann das scheitern (query.message ist dann eine InaccessibleMessage ohne
+        # reply_text), deshalb die Bestätigung direkt an den Chat schicken.
+        try:
+            await query.edit_message_reply_markup(reply_markup=None)
+        except BadRequest as e:
+            logger.info("Buttons der Benachrichtigung nicht entfernbar: %s", e)
+        await context.bot.send_message(chat_id=update.effective_chat.id,
+                                       text=f"⏹ Suche beendet: {search_button_label(search)}")
 
 
 async def on_stop_all(update: Update, context: ContextTypes.DEFAULT_TYPE):

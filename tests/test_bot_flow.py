@@ -211,7 +211,19 @@ def test_stop_from_list_and_from_notification(user, ctx):
 
     q = click(searches.on_stop, 100, f"stop:{b}", ctx)
     assert not get_search(b)['is_active'] and q.markup_removed
-    assert "Suche beendet" in q.message.replies[0][0]
+    assert ctx.bot.sent[-1][0] == 100 and "Suche beendet" in ctx.bot.sent[-1][1]
+
+
+def test_stop_from_old_notification_still_confirms(user, ctx):
+    # Bei alten Nachrichten lehnt Telegram das Bearbeiten ab und liefert ab PTB 21
+    # eine InaccessibleMessage ohne reply_text → Suche trotzdem beenden und bestätigen
+    sid = create_search(user['id'], "reisepass", "earliest")
+    update = FakeUpdate(100, data=f"stop:{sid}")
+    update.callback_query.too_old = True
+    update.callback_query.message = None
+    run(searches.on_stop(update, ctx))
+    assert not get_search(sid)['is_active']
+    assert ctx.bot.sent == [(100, "⏹ Suche beendet: ⚡ Reisepass beantragen", None)]
 
 
 def test_stop_all(user, ctx):

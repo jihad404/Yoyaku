@@ -93,10 +93,11 @@ tests/                   pytest, mit echten eTermin-Antworten als Testdaten
 
 ## Installation (Raspberry Pi)
 
-Voraussetzung: Python **3.10 oder neuer** (Raspberry Pi OS Bookworm: 3.11).
+Voraussetzung: Python **3.10 oder neuer** (getestet mit 3.11 = Raspberry Pi OS
+Bookworm und 3.13 = Raspberry Pi OS Trixie).
 
-> python-telegram-bot 20.7 läuft **nicht** unter Python 3.13. Bei einem
-> Betriebssystem-Update muss die Bibliothek mit aktualisiert werden.
+> Nach einem Betriebssystem-Update mit neuer Python-Version die virtuelle
+> Umgebung neu anlegen (`rm -rf venv`, dann die Schritte unten wiederholen).
 
 ```bash
 git clone git@github.com:jihad404/Yoyaku.git ~/repos/Yoyaku
@@ -143,6 +144,12 @@ sudo systemctl enable --now yoyaku
 
 ```bash
 cd ~/repos/Yoyaku && git pull && sudo systemctl restart yoyaku
+```
+
+Hat sich `requirements.txt` geändert, vor dem Neustart die Bibliotheken aktualisieren:
+
+```bash
+cd ~/repos/Yoyaku && git pull && venv/bin/pip install -r requirements.txt && sudo systemctl restart yoyaku
 ```
 
 Neue Spalten in der Datenbank werden beim Start automatisch angelegt.
