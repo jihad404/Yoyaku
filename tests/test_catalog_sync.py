@@ -116,3 +116,20 @@ def test_sync_informs_admin_and_affected_users_once(db, make_user, responses):
     assert "nicht mehr gebucht werden" in users[0] and "ausschließlich im Bürgerservice" in users[0]
     assert load_state(get_search(sid))["gone_notified"] is True
     assert "gone_notified" not in load_state(get_search(other))
+
+
+def test_sync_retries_user_notice_when_undelivered(db, make_user, responses):
+    from telegram.error import NetworkError
+
+    user = make_user(100)
+    sid = create_search(user['id'], "fs_ersatz", "earliest", state={"initialized": True})
+    entry(responses, STVA, 110007)["sa"] = "Dies kann ausschließlich im Bürgerservice erledigt werden!"
+    ctx = FakeContext()
+    ctx.bot.failures[100] = [NetworkError("weg")]
+
+    asyncio.run(catalog_sync.sync_catalog(ctx, client_factory=lambda: _client(responses)))
+    assert "gone_notified" not in load_state(get_search(sid))
+
+    asyncio.run(catalog_sync.sync_catalog(ctx, client_factory=lambda: _client(responses)))
+    assert [c for c, _, _ in ctx.bot.sent].count(100) == 1
+    assert load_state(get_search(sid))["gone_notified"] is True

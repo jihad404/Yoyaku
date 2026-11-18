@@ -160,5 +160,5 @@ async def sync_catalog(context, client_factory=etermin.make_client) -> None:
         state = load_state(search)
         if state.get("gone_notified"):
             continue
-        await send_to_user(context, search, _user_notice(search, reason))
-        update_search_state(search['id'], {**state, "gone_notified": True})
+        if await send_to_user(context, search, _user_notice(search, reason)):
+            update_search_state(search['id'], {**state, "gone_notified": True})

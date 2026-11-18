@@ -1,7 +1,8 @@
 import asyncio
-from datetime import date, datetime
+from datetime import date, datetime, timedelta
 
 import pytest
+from telegram.error import NetworkError, TimedOut
 
 from conftest import FakeAvailability, FakeContext, callback_datas
 from database.models import create_search, get_active_searches, get_search, load_state
@@ -120,6 +121,38 @@ def test_blocked_user_searches_are_deactivated(make_user):
     ctx.bot.blocked.add(100)
     run(ctx, FakeAvailability(days={"reisepass": [D(9)], "fs_umtausch": [D(9)]}))
     assert get_active_searches(user['id']) == []
+
+
+@pytest.mark.parametrize("error", [NetworkError("Telegram nicht erreichbar"), TimedOut()])
+def test_undelivered_notification_is_retried_next_round(make_user, error):
+    user = make_user(100)
+    sid = create_search(user['id'], "reisepass", "earliest", state=initial_state("earliest", None, [D(14)], NOW))
+    before = load_state(get_search(sid))
+    fake = FakeAvailability(days={"reisepass": [D(9), D(14)]})
+    ctx = FakeContext()
+    ctx.bot.failures[100] = [error]
+
+    run(ctx, fake)
+    assert ctx.bot.sent == []
+    assert load_state(get_search(sid)) == before, "nicht zugestellt → nicht als gemeldet speichern"
+
+    run(ctx, fake, now=NOW + timedelta(minutes=3))
+    assert len(ctx.bot.sent) == 1 and "Früherer Termin" in ctx.bot.sent[0][1]
+    assert load_state(get_search(sid))["earliest"] == "2026-10-09"
+
+
+def test_expired_search_ends_only_after_notice_was_delivered(make_user):
+    user = make_user(100)
+    sid = create_search(user['id'], "reisepass", "until", target_date="2026-10-05",
+                        state=initial_state("until", D(5), [], datetime(2026, 10, 1)))
+    ctx = FakeContext()
+    ctx.bot.failures[100] = [NetworkError("weg")]
+
+    run(ctx, FakeAvailability())
+    assert get_search(sid)['is_active'] and ctx.bot.sent == []
+
+    run(ctx, FakeAvailability())
+    assert not get_search(sid)['is_active'] and "Suche beendet" in ctx.bot.sent[0][1]
 
 
 def test_empty_result_needs_two_rounds(make_user):

@@ -40,10 +40,12 @@ def _keyboard(service, search_id, include_stop=True):
     return InlineKeyboardMarkup([buttons])
 
 
-async def send_to_user(context, search, text, reply_markup=None) -> None:
-    """Sendet eine Nachricht; Fehler brechen die Prüfrunde nicht ab."""
+async def send_to_user(context, search, text, reply_markup=None) -> bool:
+    """Sendet eine Nachricht; Fehler brechen die Prüfrunde nicht ab.
+    Gibt zurück, ob die Nachricht zugestellt wurde."""
     try:
         await context.bot.send_message(chat_id=search['telegram_id'], text=text, reply_markup=reply_markup)
+        return True
     except Forbidden:
         # Nutzer hat den Bot blockiert → alle seine Suchen beenden
         logger.warning("Nutzer %s hat den Bot blockiert, Suchen beendet", search['user_id'])
@@ -52,6 +54,7 @@ async def send_to_user(context, search, text, reply_markup=None) -> None:
     except TelegramError as e:
         logger.warning("Senden an Nutzer %s fehlgeschlagen (Suche %s): %s", search['user_id'], search['id'], e)
         log_error(f"Senden fehlgeschlagen (Suche {search['id']}): {e}", search['user_id'])
+    return False
 
 
 async def _notify_admin(context, text) -> None:
@@ -118,14 +121,18 @@ async def check_search(context, availability, search, results: dict, now: dateti
     state = load_state(search)
     today = now.date()
 
-    moved = MOVED.get(state.pop("moved_from", None))
-    if moved:
+    moved_key = state.get("moved_from")
+    if moved_key:
         # Beim Start umgestellte Suche (database/db.py): einmal erklären, dann normal
         # weiter – der leere Zustand meldet anschließend den aktuellen Stand
+        moved = MOVED.get(moved_key)
+        if moved and not await send_to_user(context, search, moved_text(moved, service, location),
+                                            _keyboard(service, search['id'])):
+            return  # nicht zugestellt → nächste Runde erneut versuchen
+        state.pop("moved_from")
         update_search_state(search['id'], state)
-        logger.info("Suche %s von %s auf %s umgestellt (Nutzer %s)", search['id'], moved.old_key,
+        logger.info("Suche %s von %s auf %s umgestellt (Nutzer %s)", search['id'], moved_key,
                     service.key, search['user_id'])
-        await send_to_user(context, search, moved_text(moved, service, location), _keyboard(service, search['id']))
 
     if mode in ("until", "day") and target < today:
         decision = evaluate(mode, target, state, [], now)
@@ -143,25 +150,28 @@ async def check_search(context, availability, search, results: dict, now: dateti
             return
         decision = evaluate(mode, target, state, matching, now)
 
+    if decision.kind:
+        slots_by_day = {}
+        if decision.kind in ("earlier", "new_days", "day_available"):
+            for day in decision.days[:5]:
+                try:
+                    slots_by_day[day] = await availability.slots(service, day, location)
+                except EterminError:
+                    pass  # Nachricht kommt dann ohne Uhrzeiten
+
+        text = notification_text(service, location, decision, target, slots_by_day)
+        markup = None if decision.end else _keyboard(service, search['id'])
+        if not await send_to_user(context, search, text, markup):
+            # Nicht zugestellt (z. B. Telegram gestört, Sendelimit): Zustand nicht speichern,
+            # damit die nächste Runde dieselbe Meldung erneut versucht. Lieber im Zweifel
+            # doppelt melden (Zeitüberschreitung nach erfolgter Zustellung) als gar nicht.
+            return
+        logger.info("Benachrichtigung '%s' für Suche %s (Nutzer %s, %s): %s", decision.kind, search['id'],
+                    search['user_id'], service.key, [d.isoformat() for d in decision.days])
+
     update_search_state(search['id'], decision.state)
     if decision.end:
         deactivate_search(search['id'])
-    if not decision.kind:
-        return
-
-    slots_by_day = {}
-    if decision.kind in ("earlier", "new_days", "day_available"):
-        for day in decision.days[:5]:
-            try:
-                slots_by_day[day] = await availability.slots(service, day, location)
-            except EterminError:
-                pass  # Nachricht kommt dann ohne Uhrzeiten
-
-    text = notification_text(service, location, decision, target, slots_by_day)
-    markup = None if decision.end else _keyboard(service, search['id'])
-    logger.info("Benachrichtigung '%s' für Suche %s (Nutzer %s, %s): %s", decision.kind, search['id'],
-                search['user_id'], service.key, [d.isoformat() for d in decision.days])
-    await send_to_user(context, search, text, markup)
 
 
 async def check_and_notify(context, availability=None, now: datetime | None = None):

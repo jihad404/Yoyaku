@@ -58,6 +58,25 @@ def test_checker_explains_move_once_then_reports_as_usual(db, make_user):
     assert "Termin frei" in texts[1] and "Do 19.11." in texts[1]
 
 
+def test_move_notice_is_retried_when_undelivered(db, make_user):
+    from telegram.error import NetworkError
+
+    user = make_user(100)
+    sid = create_search(user['id'], "fs_erweiterung", "earliest")
+    db.init_db()
+    fake = FakeAvailability(days={"bs_fs_antrag": [date(2026, 11, 19)]})
+    ctx = FakeContext()
+    ctx.bot.failures[100] = [NetworkError("weg")]
+
+    asyncio.run(checker.check_and_notify(ctx, availability=fake, now=NOW))
+    assert ctx.bot.sent == [] and load_state(get_search(sid)) == {"moved_from": "fs_erweiterung"}
+
+    asyncio.run(checker.check_and_notify(ctx, availability=fake, now=NOW))
+    texts = [t for _, t, _ in ctx.bot.sent]
+    assert len(texts) == 2 and "umgestellt" in texts[0] and "Termin frei" in texts[1]
+    assert "moved_from" not in load_state(get_search(sid))
+
+
 def test_moved_entries_point_to_existing_services():
     for moved in MOVED.values():
         assert moved.old_key not in SERVICES

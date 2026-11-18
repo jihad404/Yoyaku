@@ -95,11 +95,14 @@ class FakeBot:
     def __init__(self):
         self.sent = []          # (chat_id, text, reply_markup)
         self.blocked = set()
+        self.failures = {}      # chat_id → Ausnahmen für die nächsten Sendeversuche
 
     async def send_message(self, chat_id, text, reply_markup=None):
         from telegram.error import Forbidden
         if chat_id in self.blocked:
             raise Forbidden("blocked")
+        if self.failures.get(chat_id):
+            raise self.failures[chat_id].pop(0)
         self.sent.append((chat_id, text, reply_markup))
 
 
