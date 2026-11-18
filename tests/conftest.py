@@ -60,6 +60,7 @@ class FakeAvailability:
         self.slots_by = slots or {}
         self.fail = set(fail)              # service_keys, die einen Fehler werfen
         self.day_calls = []
+        self.slot_calls = []               # (service_key, date) je Tagesabfrage
 
     async def days(self, service):
         from scrapers.etermin import EterminError
@@ -74,6 +75,7 @@ class FakeAvailability:
 
         from scrapers.catalog import location_for_calendar
         from scrapers.etermin import Slot
+        self.slot_calls.append((service.key, day))
         default = [Slot(datetime(day.year, day.month, day.day, 9, 0), "Kalender")]
         result = self.slots_by.get((service.key, day), default)
         if location:

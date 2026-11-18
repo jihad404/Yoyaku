@@ -102,12 +102,46 @@ async def _fetch_all(context, availability, service_keys) -> dict:
     return results
 
 
-async def _candidate_days(availability, service, mode, target, location, days, today) -> list[date]:
+async def _candidate_days(availability, service, mode, target, location, days, today, state) -> list[date]:
+    """Die freien Tage, die evaluate() bewertet.
+
+    Mit Standort wird jeder Tag per Tagesabfrage geprüft (die Monatsübersicht
+    sagt nichts über Standorte). Ohne Standort werden nur die Tage geprüft, die
+    gerade eine Meldung auslösen würden – gegen Phantom-Tage der Monatsübersicht
+    (siehe Availability.matching_days). Bereits gemeldete Tage gelten ungeprüft
+    weiter; das hält die Last bei "Bis spätestens" klein."""
+    upcoming = [d for d in days if d >= today]
+    initialized = bool(state.get("initialized"))  # wie in evaluate(): erste Runde meldet alles
+
+    if location:
+        if mode == "earliest":
+            return await availability.matching_days(service, location, upcoming, limit=1)
+        if mode == "until":
+            return await availability.matching_days(service, location, [d for d in upcoming if d <= target])
+        return await availability.matching_days(service, location, [target] if target in days else [])
+
     if mode == "earliest":
-        return await availability.matching_days(service, location, [d for d in days if d >= today], limit=1)
+        previous = state.get("earliest") if initialized else None
+        earlier = [d for d in upcoming if previous is None or d.isoformat() < previous]
+        found = await availability.matching_days(service, None, earlier, limit=1)
+        if found:
+            return found
+        # nichts Früheres: der nächste Tag ab dem bisherigen frühesten löst keine Meldung aus
+        return [d for d in upcoming if previous is not None and d.isoformat() >= previous][:1]
+
     if mode == "until":
-        return await availability.matching_days(service, location, [d for d in days if today <= d <= target])
-    return await availability.matching_days(service, location, [target] if target in days else [])
+        relevant = [d for d in upcoming if d <= target]
+        known = set(state.get("known") or []) if initialized else set()
+        confirmed = set(await availability.matching_days(
+            service, None, [d for d in relevant if d.isoformat() not in known]))
+        return [d for d in relevant if d.isoformat() in known or d in confirmed]
+
+    # mode == "day"
+    if target not in days:
+        return []
+    if initialized and state.get("day_available"):
+        return [target]  # schon als frei gemeldet → keine neue Meldung, keine Prüfung nötig
+    return await availability.matching_days(service, None, [target])
 
 
 async def check_search(context, availability, search, results: dict, now: datetime) -> None:
@@ -144,7 +178,7 @@ async def check_search(context, availability, search, results: dict, now: dateti
         if not days and had_days and _empty_streak.get(service.key, 0) < EMPTY_RUNS_BEFORE_REMOVAL:
             return  # vermutlich Ladefehler, nächste Runde abwarten
         try:
-            matching = await _candidate_days(availability, service, mode, target, location, days, today)
+            matching = await _candidate_days(availability, service, mode, target, location, days, today, state)
         except EterminError as e:
             log_error(f"eTermin Zeitfenster {service.key}: {e}", search['user_id'])
             return

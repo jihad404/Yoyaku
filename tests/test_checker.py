@@ -59,6 +59,45 @@ def test_phantom_day_from_overview_is_not_reported(make_user):
     assert load_state(get_search(sid))["earliest"] == "2026-10-12"
 
 
+def test_until_without_location_checks_only_new_days(make_user):
+    user = make_user(100)
+    sid = create_search(user['id'], "reisepass", "until", target_date="2026-10-20",
+                        state=initial_state("until", D(20), [D(9), D(12)], NOW))
+    fake = FakeAvailability(days={"reisepass": [D(9), D(12), D(14), D(16)]},
+                            slots={("reisepass", D(16)): []})   # 16.10.: Phantom-Tag der Übersicht
+    ctx = FakeContext()
+
+    run(ctx, fake)
+    text = ctx.bot.sent[0][1]
+    assert "Mi 14.10." in text and "16.10." not in text
+    assert {day for _, day in fake.slot_calls} == {D(14), D(16)}, "bekannte Tage 09./12. nicht erneut abfragen"
+    assert load_state(get_search(sid))["known"] == ["2026-10-09", "2026-10-12", "2026-10-14"]
+
+    fake.slot_calls.clear()
+    run(ctx, fake, now=NOW + timedelta(minutes=3))
+    assert len(ctx.bot.sent) == 1, "nichts Neues"
+    assert fake.slot_calls == [("reisepass", D(16))], "nur der weiterhin unbestätigte Tag wird geprüft"
+
+
+def test_earliest_without_location_needs_no_day_query_when_nothing_earlier(make_user):
+    user = make_user(100)
+    create_search(user['id'], "reisepass", "earliest", state=initial_state("earliest", None, [D(9)], NOW))
+    fake = FakeAvailability(days={"reisepass": [D(9), D(14)]})
+    ctx = FakeContext()
+    run(ctx, fake)
+    assert ctx.bot.sent == [] and fake.slot_calls == []
+
+
+def test_day_already_reported_needs_no_day_query(make_user):
+    user = make_user(100)
+    create_search(user['id'], "reisepass", "day", target_date="2026-10-14",
+                  state=initial_state("day", D(14), [D(14)], NOW))
+    fake = FakeAvailability(days={"reisepass": [D(14)]})
+    ctx = FakeContext()
+    run(ctx, fake)
+    assert ctx.bot.sent == [] and fake.slot_calls == []
+
+
 def test_each_service_fetched_once_per_round(make_user):
     a, b = make_user(100), make_user(200)
     for u in (a, b):
