@@ -2,7 +2,7 @@
 from collections import OrderedDict
 from datetime import date
 
-from scrapers.catalog import LOCATIONS, SITES, Service, location_for_calendar, service_label
+from scrapers.catalog import LOCATIONS, SITES, MovedService, Service, location_for_calendar, service_label
 
 WEEKDAYS = ("Mo", "Di", "Mi", "Do", "Fr", "Sa", "So")
 MAX_TIMES = 3
@@ -75,6 +75,16 @@ def notification_text(service: Service, location: str | None, decision, target: 
         return "\n".join(["⏹ Suche beendet", label, "",
                           f"Das Datum {target:%d.%m.%Y} ist vorbei. Starte eine neue Suche mit /search."])
     raise ValueError(decision.kind)
+
+
+def moved_text(moved: MovedService, service: Service, location: str | None) -> str:
+    return "\n".join([
+        "ℹ️ Deine Suche wurde umgestellt", "",
+        f"„{moved.old_name}“ wird bei der {SITES[moved.site].name} nicht mehr online vergeben, "
+        "sondern nur noch hier:",
+        service_label(service, location), "",
+        "Ich suche ab sofort dort und melde mich, sobald ein Termin frei ist.",
+    ])
 
 
 def status_text(service: Service, location: str | None, mode: str, target: date | None,

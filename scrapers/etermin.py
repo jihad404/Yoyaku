@@ -4,6 +4,8 @@ Die Buchungsseiten der Stadt Duisburg laden ihre Daten über diese Schnittstelle
 jede Anfrage braucht den Header ``webid`` mit dem Namen der Buchungsseite.
 """
 import asyncio
+import html
+import re
 from dataclasses import dataclass
 from datetime import date, datetime
 
@@ -138,16 +140,35 @@ async def slots(client: httpx.AsyncClient, webid: str, service_id: int, day: dat
     return sorted(result, key=lambda s: s.start)
 
 
+def plain_text(text) -> str:
+    """HTML-Beschreibung von eTermin als einfacher Text; Zeilenumbrüche und
+    Absätze bleiben als einzelne Zeilen erhalten."""
+    text = re.sub(r"<br\s*/?>|</(?:p|div|li|a)>", "\n", str(text or ""), flags=re.IGNORECASE)
+    text = html.unescape(re.sub(r"<[^>]+>", " ", text))
+    text = re.sub(r"[^\S\n]+", " ", text)
+    return re.sub(r"\s*\n\s*", "\n", text).strip()
+
+
 async def list_services(client: httpx.AsyncClient, webid: str) -> list[dict]:
-    """Alle buchbaren Dienstleistungen einer Buchungsseite."""
+    """Alle Dienstleistungen einer Buchungsseite.
+
+    ``description`` ist der Hinweistext, den die Buchungsseite über der
+    Terminwahl zeigt (Gruppe + Dienstleistung). ``no_booking`` entspricht dem
+    eTermin-Feld ``bt``: Am 18.11.2026 stand es genau bei den Dienstleistungen
+    auf 1, für die die Seite keine Terminwahl mehr anbot ("ausschließlich im
+    Bürgerservice"), überall sonst auf 0.
+    """
     services = []
     for entry in await _get_list(client, webid, "/api/servicegroupservice"):
         if not isinstance(entry, dict):
             raise EterminError(f"{webid} servicegroupservice: unerwarteter Eintrag {entry!r}")
         if entry.get("sid"):  # leere Gruppen haben keine sid
+            description = "\n".join(t for t in (plain_text(entry.get("sga")), plain_text(entry.get("sa"))) if t)
             services.append({"sid": int(entry["sid"]), "name": str(entry.get("s") or "").strip(),
                              "group": str(entry.get("sg") or "").strip(),
-                             "duration": int(entry.get("duration") or 0)})
+                             "duration": int(entry.get("duration") or 0),
+                             "description": description,
+                             "no_booking": bool(entry.get("bt"))})
     return services
 
 

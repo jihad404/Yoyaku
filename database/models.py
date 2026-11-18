@@ -238,6 +238,34 @@ def get_all_active_searches():
     return searches
 
 
+def get_service_snapshot(webid) -> dict:
+    """Zuletzt gesehener Stand der Dienstleistungen einer Buchungsseite: {sid: Row}."""
+    connection = get_connection()
+    cursor = connection.cursor()
+
+    cursor.execute('SELECT * FROM etermin_services WHERE webid = ?', (webid,))
+
+    rows = {row['sid']: row for row in cursor.fetchall()}
+    connection.close()
+
+    return rows
+
+
+def save_service_snapshot(webid, services):
+    """Ersetzt den gespeicherten Stand einer Buchungsseite (Liste aus etermin.list_services)."""
+    connection = get_connection()
+    cursor = connection.cursor()
+
+    cursor.execute('DELETE FROM etermin_services WHERE webid = ?', (webid,))
+    cursor.executemany(
+        'INSERT INTO etermin_services (webid, sid, name, no_booking, description) VALUES (?, ?, ?, ?, ?)',
+        [(webid, s['sid'], s['name'], int(s['no_booking']), s['description']) for s in services]
+    )
+
+    connection.commit()
+    connection.close()
+
+
 def log_error(error_message, user_id=None):
     """Speichert einen Fehler und gibt eine kurze Referenz für den Nutzer zurück."""
     reference = uuid.uuid4().hex[:8].upper()

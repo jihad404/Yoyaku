@@ -1,5 +1,8 @@
+import json
 import sqlite3
 import os
+
+from scrapers.catalog import MOVED
 
 DATABASE_PATH = os.path.join(os.path.dirname(__file__),'..', 'yoyaku.db')
 
@@ -66,6 +69,33 @@ def init_db():
     # Alte Scraper-Namen auf Katalog-Schlüssel umstellen
     cursor.execute("UPDATE searches SET search_type = 'wiederzulassung' WHERE search_type = 'duisburg_zulassung'")
     cursor.execute("UPDATE searches SET is_active = 0 WHERE search_type = 'duisburg_aufenthalt'")
+
+    # Umgezogene Dienstleistungen (scrapers/catalog.py: MOVED): aktive Suchen umstellen.
+    # Der Zustand beginnt neu; "moved_from" sorgt für eine einmalige Nachricht an den Nutzer.
+    for moved in MOVED.values():
+        cursor.execute(
+            "UPDATE searches SET search_type = ?, state = ? WHERE search_type = ? AND is_active = 1",
+            (moved.new_key, json.dumps({"moved_from": moved.old_key}), moved.old_key))
+    # Durch die Umstellung können identische Suchen entstehen → nur die älteste bleibt aktiv
+    cursor.execute('''
+        UPDATE searches SET is_active = 0
+        WHERE is_active = 1 AND id NOT IN (
+            SELECT MIN(id) FROM searches WHERE is_active = 1
+            GROUP BY user_id, search_type, mode, IFNULL(target_date, ''), IFNULL(location, '')
+        )
+    ''')
+
+    # Zuletzt gesehener Stand der eTermin-Dienstleistungen (für den Katalogabgleich)
+    cursor.execute('''
+        CREATE TABLE IF NOT EXISTS etermin_services (
+            webid TEXT NOT NULL,
+            sid INTEGER NOT NULL,
+            name TEXT NOT NULL,
+            no_booking INTEGER NOT NULL,
+            description TEXT NOT NULL,
+            PRIMARY KEY (webid, sid)
+        )
+    ''')
 
     # Error Logs Tabelle
     cursor.execute('''

@@ -4,174 +4,249 @@
   "sg": "Ersatzführerschein (Verlust / Diebstahl)",
   "sid": 110007,
   "s": "Ersatz nach  Verlust/Diebstahl",
-  "duration": 15
+  "duration": 15,
+  "bt": 0,
+  "sga": "",
+  "sa": "<b><u>Hier klicken</u> und damit die Dienstleistung auswählen, dann \"Weiter zur Terminwahl\"</b><br><br>\n \n<br><br>\n<a href=\"https://www.duisburg.de/vv/produkte/pro_du/dez_vii/32/verlust_fuehrerschein.php\" target=\"_blank\">Weitere Informationen</a>"
  },
  {
   "sgid": 53431,
   "sg": "Ausstellung Internationaler Führerschein",
   "sid": 110021,
   "s": "Internationaler Führerschein (im Besitz grauer/rosa FS oder aus anderer Stadt)",
-  "duration": 15
+  "duration": 15,
+  "bt": 0,
+  "sga": "",
+  "sa": "<b><u>Keine</u> Umschreibung ausländischer Fahrerlaubnisse!</b><br><br>\n<b><u>Hier klicken</u> und damit die Dienstleistung auswählen, dann \"Weiter zur Terminwahl\"</b><br><br>\n\n<a href=\"https://www.duisburg.de/vv/produkte/pro_du/dez_vii/32/internationaler_fuehrerschein.php\" target=\"_blank\">Weitere Informationen</a>"
  },
  {
   "sgid": 53431,
   "sg": "Ausstellung Internationaler Führerschein",
   "sid": 110022,
   "s": "Internationaler Führerschein (im Besitz des Kartenführerscheins, ausgestellt in Duisburg)",
-  "duration": 15
+  "duration": 15,
+  "bt": 0,
+  "sga": "",
+  "sa": "<b><u>Keine</u> Umschreibung ausländischer Fahrerlaubnisse!</b><br><br>\n<b><u>Hier klicken</u> und damit die Dienstleistung auswählen, dann \"Weiter zur Terminwahl\"</b><br><br>\n\n<br><br>\n<a href=\"https://www.duisburg.de/vv/produkte/pro_du/dez_vii/32/internationaler_fuehrerschein.php\" target=\"_blank\">Weitere Informationen</a>\n\nTipp: Dies können Sie auch im Bürgerservice Ihrer Wahl erledigen! <a href=\"https://www.duisburg.de/allgemein/fachbereiche/90/terminvereinbarung-buergerservice.php\" target=\"_blank\">Hier geht es direkt zur Terminvereinbarung der Bürgerservicestelle</a>"
  },
  {
   "sgid": 53432,
   "sg": "Umschreibung ausländischer Fahrerlaubnisse",
   "sid": 110023,
   "s": "Umschreibung ausländische Drittstaats-Fahrerlaubnis (Nicht-EU)",
-  "duration": 20
+  "duration": 20,
+  "bt": 0,
+  "sga": "",
+  "sa": "<b><u>Hier klicken</u> und damit die Dienstleistung auswählen, dann \"Weiter zur Terminwahl\"</b><br><br>\n\n<a href=\"https://www.duisburg.de/vv/produkte/pro_du/dez_vii/32/drittstatten_fuehrerschein_umschreibung.php\" target=\"_blank\">Weitere Informationen</a>"
  },
  {
   "sgid": 53432,
   "sg": "Umschreibung ausländischer Fahrerlaubnisse",
   "sid": 110025,
   "s": "Umschreibung ausländische EU-Fahrerlaubnis",
-  "duration": 25
+  "duration": 25,
+  "bt": 0,
+  "sga": "",
+  "sa": "<b><u>Hier klicken</u> und damit die Dienstleistung auswählen, dann \"Weiter zur Terminwahl\"</b><br><br>\n\n<a href=\"https://www.duisburg.de/vv/produkte/pro_du/dez_vii/32/auslaendisch_eu_fuehrerschein_umschreibung.php\" target=\"_blank\">Weitere Informationen</a>"
  },
  {
   "sgid": 53427,
   "sg": "Personenbeförderung, Berufskraftverkehr",
   "sid": 110008,
   "s": "Fahrerlaubnis zur Fahrgastbeförderung („Taxischein“)",
-  "duration": 15
+  "duration": 15,
+  "bt": 0,
+  "sga": "",
+  "sa": "<b><u>Hier klicken</u> und damit die Dienstleistung auswählen, dann \"Weiter zur Terminwahl\"</b><br><br>\n\n<a href=\"https://www.duisburg.de/vv/produkte/pro_du/dez_vii/32/fahrerlaubnis_taxischein.php\" target=\"_blank\">Weitere Informationen</a>"
  },
  {
   "sgid": 53427,
   "sg": "Personenbeförderung, Berufskraftverkehr",
   "sid": 110010,
   "s": "Fahrerkarte beantragen",
-  "duration": 10
+  "duration": 10,
+  "bt": 0,
+  "sga": "",
+  "sa": "<b><u>Hier klicken</u> und damit die Dienstleistung auswählen, dann \"Weiter zur Terminwahl\"</b><br><br>\n\nOhne Termin zu unseren Öffnungszeiten am Walk-By Schalter möglich! \nZusammen mit anderen Dienstleistungen (z.B. Verlängerung C-Klassen) nur mit Termin.\n\n<a href=\"https://www.duisburg.de/vv/produkte/pro_du/dez_vii/32/fahrerkarte.php\" target=\"_blank\">Weitere Informationen</a>"
  },
  {
   "sgid": 53427,
   "sg": "Personenbeförderung, Berufskraftverkehr",
   "sid": 110018,
   "s": "Eintragung Schlüsselzahl 95 - FQN (\"Module\" BKrFQG)",
-  "duration": 10
+  "duration": 10,
+  "bt": 0,
+  "sga": "",
+  "sa": "<b><u>Hier klicken</u> und damit die Dienstleistung auswählen, dann \"Weiter zur Terminwahl\"</b><br><br>\n\n<a href=\"https://www.duisburg.de/vv/produkte/pro_du/dez_vii/32/eintragung_berufskraftfaher-qualifikation.php\" target=\"_blank\">Weitere Informationen</a>"
  },
  {
   "sgid": 53427,
   "sg": "Personenbeförderung, Berufskraftverkehr",
   "sid": 110019,
   "s": "Verlängerung Klasse C/CE (beinhaltet auch Fahrerkarte & FQN)",
-  "duration": 20
+  "duration": 20,
+  "bt": 0,
+  "sga": "",
+  "sa": "<b><u>Hier klicken</u> und damit die Dienstleistung auswählen, dann \"Weiter zur Terminwahl\"</b><br><br>\n\n<a href=\"https://www.duisburg.de/vv/produkte/pro_du/dez_vii/32/verlaengerung_fahrerlaubnis_c1c1e_cce.php\" target=\"_blank\">Weitere Informationen</a>\n\nTipp: Dies (mit Ausnahme der Fahrerkarte) können Sie auch im Bürgerservice Ihrer Wahl erledigen! <a href=\"https://www.duisburg.de/allgemein/fachbereiche/90/terminvereinbarung-buergerservice.php\" target=\"_blank\">Hier geht es direkt zur Terminvereinbarung der Bürgerservicestelle</a>"
  },
  {
   "sgid": 53427,
   "sg": "Personenbeförderung, Berufskraftverkehr",
   "sid": 110020,
   "s": "Verlängerung Klasse D/DE  (beinhaltet auch Fahrerkarte & FQN)",
-  "duration": 20
+  "duration": 20,
+  "bt": 0,
+  "sga": "",
+  "sa": "<b><u>Hier klicken</u> und damit die Dienstleistung auswählen, dann \"Weiter zur Terminwahl\"</b><br><br>\n\n<a href=\"https://www.duisburg.de/vv/produkte/pro_du/dez_vii/32/verlaengerung_fahrerlaubnis_d1d1e_dde.php\" target=\"_blank\">Weitere Informationen</a>\n\nTipp: Dies (mit Ausnahme der Fahrerkarte) können Sie auch im Bürgerservice Ihrer Wahl erledigen! <a href=\"https://www.duisburg.de/allgemein/fachbereiche/90/terminvereinbarung-buergerservice.php\" target=\"_blank\">Hier geht es direkt zur Terminvereinbarung der Bürgerservicestelle</a>"
  },
  {
   "sgid": 53433,
   "sg": "Sonstige Fahrerlaubnisangelegenheiten",
   "sid": 110033,
   "s": "Eintragung Schlüsselzahl B96 & B196 & B197",
-  "duration": 15
+  "duration": 15,
+  "bt": 0,
+  "sga": "",
+  "sa": "<b><u>Hier klicken</u> und damit die Dienstleistung auswählen, dann \"Weiter zur Terminwahl\"</b><br><br>\n\nTipp: Dies können Sie auch im Bürgerservice Ihrer Wahl (unter der Dienstleistung Führerscheinanträge) erledigen, sofern Sie keinen vorläufigen Führerschein benötigen!<br> <a href=\"https://www.duisburg.de/allgemein/fachbereiche/90/terminvereinbarung-buergerservice.php\" target=\"_blank\">Hier geht es direkt zur Terminvereinbarung der Bürgerservicestelle</a>\n<br>\n<a href=\"https://www.duisburg.de/vv/produkte/pro_du/dez_vii/32/102010100000055092.php\" target=\"_blank\">Weitere Informationen zu B96</a> <br>\n<a href=\"https://www.duisburg.de/vv/produkte/pro_du/dez_vii/32/102010100000095122.php\n\" target=\"_blank\">Weitere Informationen zu B196</a>"
  },
  {
   "sgid": 53433,
   "sg": "Sonstige Fahrerlaubnisangelegenheiten",
   "sid": 110027,
   "s": "Fahrschulwechsel",
-  "duration": 15
+  "duration": 15,
+  "bt": 0,
+  "sga": "",
+  "sa": "<b><u>Hier klicken</u> und damit die Dienstleistung auswählen, dann \"Weiter zur Terminwahl\"</b><br><br>\n\n<a href=\"https://www.duisburg.de/vv/produkte/pro_du/dez_vii/32/fahrschulwechsel.php\" target=\"_blank\">Weitere Informationen</a>\n\n</a>\nEinen Wechsel innerhalb des TÜV Duisburg- Gebietes können Sie auch ohne Termin am Walk-By Schalter beantragen."
  },
  {
   "sgid": 53433,
   "sg": "Sonstige Fahrerlaubnisangelegenheiten",
   "sid": 110028,
   "s": "Änderung Theorieprüfung (Sprache, Ausweis, o.ä.)",
-  "duration": 10
+  "duration": 10,
+  "bt": 0,
+  "sga": "",
+  "sa": "<b><u>Hier klicken</u> und damit die Dienstleistung auswählen, dann \"Weiter zur Terminwahl\"</b><br><br>"
  },
  {
   "sgid": 53433,
   "sg": "Sonstige Fahrerlaubnisangelegenheiten",
   "sid": 110031,
   "s": "Vorsprache zur laufenden Wiedererteilung",
-  "duration": 15
+  "duration": 15,
+  "bt": 0,
+  "sga": "",
+  "sa": "<b><u>Hier klicken</u> und damit die Dienstleistung auswählen, dann \"Weiter zur Terminwahl\"</b><br><br>\n\n<a href=\"https://www.duisburg.de/vv/produkte/pro_du/dez_vii/32/neuerteilung_fahrerlaubnis.php\" target=\"_blank\">Weitere Informationen</a>"
  },
  {
   "sgid": 53433,
   "sg": "Sonstige Fahrerlaubnisangelegenheiten",
   "sid": 110032,
   "s": "Beratung zum laufenden Führerscheinantrag",
-  "duration": 20
+  "duration": 20,
+  "bt": 0,
+  "sga": "",
+  "sa": "<b><u>Hier klicken</u> und damit die Dienstleistung auswählen, dann \"Weiter zur Terminwahl\"</b><br><br>\nTipp: Bitte beachten Sie die Hinweise auf der jeweiligen Infoseite zu Ihrer Antragsart, insbesondere zur durchschnittlichen Bearbeitungsdauer!"
  },
  {
   "sgid": 53433,
   "sg": "Sonstige Fahrerlaubnisangelegenheiten",
   "sid": 110030,
   "s": "Umschreibung von Dienstführerscheinen (BW/Polizei)",
-  "duration": 20
+  "duration": 20,
+  "bt": 0,
+  "sga": "",
+  "sa": "<b><u>Hier klicken</u> und damit die Dienstleistung auswählen, dann \"Weiter zur Terminwahl\"</b><br><br>\n\n<a href=\"https://www.duisburg.de/vv/produkte/pro_du/dez_vii/32/fuehrerschein_umschreibung_bw.php\" target=\"_blank\">Weitere Informationen</a>"
  },
  {
   "sgid": 53433,
   "sg": "Sonstige Fahrerlaubnisangelegenheiten",
   "sid": 155245,
   "s": "Änderung von Auflagen (z.B. Sehhilfe)",
-  "duration": 15
+  "duration": 15,
+  "bt": 0,
+  "sga": "",
+  "sa": "<b><u>Hier klicken</u> und damit die Dienstleistung auswählen, dann \"Weiter zur Terminwahl\"</b><br><br>\n\n<a href=\"https://www.duisburg.de/vv/produkte/pro_du/dez_vii/32/102010100000082771.php\" target=\"_blank\">Weitere Informationen</a>"
  },
  {
   "sgid": 53434,
   "sg": "Umtausch Führerschein",
   "sid": 345805,
   "s": "Umtausch eines deutschen Führerscheins",
-  "duration": 15
+  "duration": 15,
+  "bt": 0,
+  "sga": "Reglementierter Pflichtumtausch und normaler Umtausch DEUTSCHER Führerscheine.\nDies kann bei der zentralen Fahrerlaubnisbehörde erledigt werden",
+  "sa": "Aktuelle Umtauschfrist bis zum 19.01.2027: Kartenführerscheine die <b>von 2002 bis 2004</b>  ausgestellt wurden. \n<br><br>\n\nPflichtumtausch sowie normaler Umtausch (z.B. Namensänderung) eines vorhandenen Führerscheins. \n\n (<b>Nur</b> deutscher Führerschein zu neuem Kartenführerschein. !!! <b>Kein Tausch von ausländischen Führerscheinen!!! </b> ) <br><br>\n<b><u>Hier klicken</u> und damit die Dienstleistung auswählen, dann \"Weiter zur Terminwahl\"</b><br><br>\n\n<a href=\"https://www.duisburg.de/vv/produkte/pro_du/dez_vii/32/eu-fuehrerschein_umtausch.php\" target=\"_blank\">Weitere Informationen</a>\n<br><br>\n\n<b>Hinweis: Personen die vor 1953 geboren sind,  müssen den Führerschein erst bis zum 19.1.2033 tauschen.<b>\n<br><br> \n<span style=\"color: red;\">Diese Dienstleistung ist auch in den Bürger-Service-Stationen möglich. <a href=\"https://duisburg.de/allgemein/fachbereiche/90/terminvereinbarung-buergerservice.php\" target=\"_blank\">Terminbuchung BSS</a> </span>\n<br><br>"
  },
  {
   "sgid": 52956,
   "sg": "Abholung & Versand von Führerscheinen",
   "sid": 108401,
   "s": "Abholung Führerschein",
-  "duration": 15
+  "duration": 15,
+  "bt": 0,
+  "sga": "",
+  "sa": "<b><u>Hier klicken</u> und damit die Dienstleistung auswählen, dann \"Weiter zur Terminwahl\"</b><br><br>\n\n<a href=\"https://www.duisburg.de/vv/produkte/pro_du/dez_vii/32/102010100000082547.php\" target=\"_blank\">Weitere Informationen</a><br><br>\n\n- Prüfung bestanden und die B197 muss nachgetragen werden?<br>\n- 18 geworden und begleitendes Fahren mit 17 beantragt ? <br> \n<b>-> Dann ist die Abholung des Führerscheins in der Regel auch ohne Termin am Walk-By Schalter möglich.</b> <br>Näheres \n<a href=\"https://www.duisburg.de/vv/produkte/pro_du/dez_vii/32/102010100000082547.php\" target=\"_blank\">hier</a> unter Details"
  },
  {
   "sgid": 52956,
   "sg": "Abholung & Versand von Führerscheinen",
   "sid": 131749,
   "s": "Änderung Wohnanschrift Direktversand",
-  "duration": 10
+  "duration": 10,
+  "bt": 0,
+  "sga": "",
+  "sa": "<b><u>Hier klicken</u> und damit die Dienstleistung auswählen, dann \"Weiter zur Terminwahl\"</b><br><br>\n\n<a href=\"https://www.duisburg.de/vv/produkte/pro_du/dez_ii/32/102010100000082758.php\" target=\"_blank\">Weitere Informationen</a>"
  },
  {
   "sgid": 53435,
   "sg": "Fahrerlaubnisbeantragung",
   "sid": 110036,
   "s": "Ersterteilung",
-  "duration": 60
+  "duration": 60,
+  "bt": 1,
+  "sga": "Dies kann ausschließlich im Bürgerservice Ihrer Wahl erledigt werden!",
+  "sa": "<a href=\"https://www.duisburg.de/vv/produkte/pro_du/dez_vii/32/eu-fuehrerschein-erstantrag.php?cg_at_id=0\" target=\"_blank\">Weitere Informationen</a>\n\nDies kann ausschließlich im Bürgerservice Ihrer Wahl erledigt werden! <a href=\"https://www.duisburg.de/allgemein/fachbereiche/90/terminvereinbarung-buergerservice.php\" target=\"_blank\">Hier geht es direkt zur Terminvereinbarung</a>"
  },
  {
   "sgid": 53435,
   "sg": "Fahrerlaubnisbeantragung",
   "sid": 110037,
   "s": "Ersterteilung mit begleitetem Fahren ab 17",
-  "duration": 60
+  "duration": 60,
+  "bt": 1,
+  "sga": "Dies kann ausschließlich im Bürgerservice Ihrer Wahl erledigt werden!",
+  "sa": "<a href=\"https://www.duisburg.de/vv/produkte/pro_du/dez_vii/32/fuehrerschein_17.php\" target=\"_blank\">Weitere Informationen</a>\n\nDies kann ausschließlich im Bürgerservice Ihrer Wahl erledigt werden! <a href=\"https://www.duisburg.de/allgemein/fachbereiche/90/terminvereinbarung-buergerservice.php\" target=\"_blank\">Hier geht es direkt zur Terminvereinbarung</a>"
  },
  {
   "sgid": 53435,
   "sg": "Fahrerlaubnisbeantragung",
   "sid": 110038,
   "s": "Erweiterung",
-  "duration": 60
+  "duration": 60,
+  "bt": 1,
+  "sga": "Dies kann ausschließlich im Bürgerservice Ihrer Wahl erledigt werden!",
+  "sa": "<a href=\"https://www.duisburg.de/vv/produkte/pro_du/dez_vii/32/erweiterung_fahrerlaubnis.php\" target=\"_blank\">Weitere Informationen</a>\n\nDies kann ausschließlich im Bürgerservice Ihrer Wahl erledigt werden! <a href=\"https://www.duisburg.de/allgemein/fachbereiche/90/terminvereinbarung-buergerservice.php\" target=\"_blank\">Hier geht es direkt zur Terminvereinbarung</a>"
  },
  {
   "sgid": 53435,
   "sg": "Fahrerlaubnisbeantragung",
   "sid": 110039,
   "s": "Neuerteilung (\"Wiedererteilung\")",
-  "duration": 60
+  "duration": 60,
+  "bt": 1,
+  "sga": "Dies kann ausschließlich im Bürgerservice Ihrer Wahl erledigt werden!",
+  "sa": "<a href=\"https://www.duisburg.de/vv/produkte/pro_du/dez_vii/32/neuerteilung_fahrerlaubnis.php\" target=\"_blank\">Weitere Informationen</a>\n\nNeuerteilung nach vorangegangener Entziehung oder Verzicht. Dies kann ausschließlich im Bürgerservice Ihrer Wahl erledigt werden! <a href=\"https://www.duisburg.de/allgemein/fachbereiche/90/terminvereinbarung-buergerservice.php\" target=\"_blank\">Hier geht es direkt zur Terminvereinbarung</a>"
  },
  {
   "sgid": 163472,
   "sg": "Walk-By",
   "sid": null,
   "s": "",
-  "duration": null
+  "duration": null,
+  "bt": null,
+  "sga": "",
+  "sa": ""
  }
 ]

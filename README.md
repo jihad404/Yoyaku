@@ -4,12 +4,12 @@ Telegram-Bot, der freie Termine bei der **Stadt Duisburg** überwacht und Nutzer
 benachrichtigt, sobald ein passender Termin online buchbar wird.
 
 Abgedeckt sind alle Dienstleistungen der vier eTermin-Buchungsseiten der Stadt
-(insgesamt 95 eTermin-IDs, im Bot 91 Einträge):
+(insgesamt 96 eTermin-IDs, im Bot 88 Einträge):
 
 | Buchungsseite | Beispiele |
 |---|---|
-| Bürgerservice (7 Bürger-Service-Stationen) | Personalausweis, Reisepass, An-/Ummeldung, Führungszeugnis, Fundsachen |
-| Fahrerlaubnisbehörde | Ersterteilung, Umtausch, Internationaler Führerschein, Umschreibung |
+| Bürgerservice (7 Bürger-Service-Stationen) | Personalausweis, Reisepass, An-/Ummeldung, Führerscheinanträge, Führungszeugnis, Fundsachen |
+| Fahrerlaubnisbehörde | Umtausch, Ersatz, Internationaler Führerschein, Umschreibung, Taxischein |
 | Zulassungsstelle | Neuzulassung, Wiederzulassung, Kennzeichen, Umschreibung |
 | Gewerbemeldestelle | Gewerbe an-/ab-/ummelden, Gewerbezentralregister |
 
@@ -55,7 +55,11 @@ ihre Daten laden (kein Browser, kein Selenium).
 - **Keine Nachrichtenflut:** Derselbe Tag wird pro Suche höchstens alle 2 Stunden
   gemeldet; ein einzelnes leeres Ergebnis (Ladefehler) wird ignoriert.
 - **Täglicher Katalogabgleich** um 06:00: Der Admin wird informiert, wenn eTermin
-  Dienstleistungen hinzufügt oder entfernt.
+  - Dienstleistungen hinzufügt oder entfernt (➕/➖),
+  - eine Dienstleistung zwar noch listet, sie dort aber nicht mehr buchbar ist, z. B.
+    „Dies kann ausschließlich im Bürgerservice erledigt werden“ oder ausgeblendete
+    Terminwahl (🚫) – Nutzer mit Suchen darauf bekommen einmal einen Hinweis,
+  - Name, Hinweistext oder Terminwahl einer Dienstleistung ändert (✏️, einmalig je Änderung).
 - **Überwachung:** Ist eine Buchungsseite 3 Runden lang nicht erreichbar, bekommt
   der Admin eine Nachricht (und eine Entwarnung, wenn es wieder geht).
 
@@ -182,6 +186,11 @@ Meldet der tägliche Abgleich neue oder entfernte Dienstleistungen, wird
 `scrapers/catalog.py` angepasst: Eintrag mit Schlüssel, Thema, kurzem Namen,
 Buchungsseite, eTermin-ID und Stichwörtern hinzufügen bzw. entfernen.
 `tests/test_catalog.py` prüft, dass der Katalog vollständig zu den Testdaten passt.
+
+Ist eine Dienstleistung **umgezogen** (🚫, z. B. Führerscheinanträge seit November 2026
+nur noch im Bürgerservice), wird der alte Eintrag aus `_SERVICES` entfernt und in
+`MOVED` mit dem neuen Schlüssel eingetragen. Beim nächsten Start stellt der Bot alle
+aktiven Suchen darauf um und schreibt den Nutzern einmal, wo jetzt gesucht wird.
 
 ## Entwicklung
 

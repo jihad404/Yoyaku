@@ -87,6 +87,28 @@ def test_list_services_includes_duration():
     assert anmeldung["duration"] == 12
 
 
+def test_list_services_reads_hint_text_and_booking_flag():
+    # Echte Antwort der Fahrerlaubnisbehörde vom 18.11.2026
+    def handler(request):
+        return httpx.Response(200, json=load_fixture("servicegroupservice_qterminstadtduisburgstva.json"))
+
+    async def run():
+        async with _client(handler) as client:
+            return await etermin.list_services(client, "qterminstadtduisburgstva")
+
+    services = {s["sid"]: s for s in asyncio.run(run())}
+    ersterteilung, ersatz = services[110036], services[110007]
+    assert ersterteilung["no_booking"] is True and ersatz["no_booking"] is False
+    assert "Dies kann ausschließlich im Bürgerservice Ihrer Wahl erledigt werden!" in ersterteilung["description"]
+    assert ersterteilung["description"].splitlines() == [
+        "Dies kann ausschließlich im Bürgerservice Ihrer Wahl erledigt werden!",
+        "Weitere Informationen",
+        "Dies kann ausschließlich im Bürgerservice Ihrer Wahl erledigt werden! "
+        "Hier geht es direkt zur Terminvereinbarung",
+    ]
+    assert [s["sid"] for s in services.values() if s["no_booking"]] == [110036, 110037, 110038, 110039]
+
+
 def test_slots_parses_time_and_calendar():
     def handler(request):
         assert "rangesearch" not in request.url.params

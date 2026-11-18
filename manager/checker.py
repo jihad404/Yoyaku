@@ -11,9 +11,9 @@ from database.models import (
     update_search_state,
 )
 from manager.evaluate import evaluate
-from manager.messages import notification_text
+from manager.messages import moved_text, notification_text
 from scrapers import registry
-from scrapers.catalog import SERVICES, SITES, booking_url
+from scrapers.catalog import MOVED, SERVICES, SITES, booking_url
 from scrapers.etermin import EterminError
 
 logger = logging.getLogger(__name__)
@@ -117,6 +117,15 @@ async def check_search(context, availability, search, results: dict, now: dateti
     location = search['location']
     state = load_state(search)
     today = now.date()
+
+    moved = MOVED.get(state.pop("moved_from", None))
+    if moved:
+        # Beim Start umgestellte Suche (database/db.py): einmal erklären, dann normal
+        # weiter – der leere Zustand meldet anschließend den aktuellen Stand
+        update_search_state(search['id'], state)
+        logger.info("Suche %s von %s auf %s umgestellt (Nutzer %s)", search['id'], moved.old_key,
+                    service.key, search['user_id'])
+        await send_to_user(context, search, moved_text(moved, service, location), _keyboard(service, search['id']))
 
     if mode in ("until", "day") and target < today:
         decision = evaluate(mode, target, state, [], now)

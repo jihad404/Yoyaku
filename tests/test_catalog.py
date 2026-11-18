@@ -65,6 +65,11 @@ def test_button_names_are_short():
     ("umzug", "ummeldung"),
     ("Wiederzulassung", "wiederzulassung"),
     ("führungszeugnis", "fuehrungszeugnis"),
+    ("ersterteilung", "bs_fs_antrag"),
+    ("Führerschein beantragen", "bs_fs_antrag"),
+    ("begleitetes fahren", "bs_fs_antrag"),
+    ("führerschein erweiterung", "bs_fs_antrag"),
+    ("neuerteilung", "bs_fs_antrag"),
 ])
 def test_search_finds_expected_service(query, expected):
     results = catalog.search(query)

@@ -209,17 +209,11 @@ _SERVICES = [
     _s("bs_fahrzeug_abmeldung", "fahrzeug", "abmeldung", "Fahrzeug abmelden (Bürgerservice)", "buergerservice",
        93357, "abmelden außerbetriebsetzung stilllegen auto"),
 
-    # --- Führerschein: Beantragen (Fahrerlaubnisbehörde) ---
-    _s("fs_ersterteilung", "fuehrerschein", "antrag", "Ersterteilung", "fahrerlaubnis", 110036,
-       "erster führerschein fahrerlaubnis antrag neu klasse b"),
-    _s("fs_bf17", "fuehrerschein", "antrag", "Begleitetes Fahren ab 17", "fahrerlaubnis", 110037,
-       "bf17 17 begleitet jugendlich"),
-    _s("fs_erweiterung", "fuehrerschein", "antrag", "Erweiterung (neue Klasse)", "fahrerlaubnis", 110038,
-       "klasse erweitern motorrad lkw"),
-    _s("fs_neuerteilung", "fuehrerschein", "antrag", "Neuerteilung (nach Entzug)", "fahrerlaubnis", 110039,
-       "wiedererteilung entzug mpu"),
-    _s("bs_fs_antrag", "fuehrerschein", "antrag", "Führerscheinantrag (Bürgerservice)", "buergerservice", 90496,
-       "erstantrag erweiterung verlängerung wiedererteilung"),
+    # --- Führerschein: Beantragen (seit Nov. 2026 nur noch im Bürgerservice, siehe MOVED) ---
+    _s("bs_fs_antrag", "fuehrerschein", "antrag", "Führerschein beantragen (alle Anträge)", "buergerservice",
+       90496, "erstantrag ersterteilung erster führerschein fahrerlaubnis antrag neu klasse b bf17 17 "
+              "begleitet begleitetes fahren jugendlich erweiterung erweitern motorrad lkw verlängerung "
+              "neuerteilung wiedererteilung entzug mpu b96 b196"),
 
     # --- Führerschein: Umtausch & Ersatz ---
     _s("fs_umtausch", "fuehrerschein", "umtausch", "Deutschen Führerschein umtauschen", "fahrerlaubnis", 345805,
@@ -326,13 +320,48 @@ _SERVICES = [
 SERVICES: dict[str, Service] = {s.key: s for s in _SERVICES}
 
 
+# ---------------------------------------------------------------------------
+# Umgezogene Dienstleistungen
+# ---------------------------------------------------------------------------
+
+
+@dataclass(frozen=True)
+class MovedService:
+    """Eine Dienstleistung, die eTermin noch listet, die dort aber nicht mehr
+    gebucht werden kann, weil eine andere Stelle zuständig ist. Aktive Suchen
+    werden beim Start auf ``new_key`` umgestellt (database/db.py), der Nutzer
+    bekommt dazu einmal eine Nachricht (manager/checker.py)."""
+    old_key: str
+    old_name: str
+    site: str
+    sid: int
+    new_key: str
+
+
+MOVED = {m.old_key: m for m in [
+    # Fahrerlaubnisbehörde, Gruppe "Fahrerlaubnisbeantragung", festgestellt 18.11.2026:
+    # "Dies kann ausschließlich im Bürgerservice Ihrer Wahl erledigt werden!"
+    MovedService("fs_ersterteilung", "Ersterteilung", "fahrerlaubnis", 110036, "bs_fs_antrag"),
+    MovedService("fs_bf17", "Begleitetes Fahren ab 17", "fahrerlaubnis", 110037, "bs_fs_antrag"),
+    MovedService("fs_erweiterung", "Erweiterung (neue Klasse)", "fahrerlaubnis", 110038, "bs_fs_antrag"),
+    MovedService("fs_neuerteilung", "Neuerteilung (nach Entzug)", "fahrerlaubnis", 110039, "bs_fs_antrag"),
+]}
+
+
 def services_in(topic: str, subtopic: str | None = None) -> list[Service]:
     return [s for s in _SERVICES if s.topic == topic and (subtopic is None or s.subtopic == subtopic)]
 
 
 def known_sids(site: str) -> set[int]:
-    """Alle eTermin-IDs einer Buchungsseite, die der Katalog kennt (inkl. Aliase)."""
-    return {sid for s in _SERVICES if s.site == site for sid in (s.sid, *s.aliases)}
+    """Alle eTermin-IDs einer Buchungsseite, die der Katalog kennt (inkl. Aliase
+    und umgezogener Dienstleistungen)."""
+    return ({sid for s in _SERVICES if s.site == site for sid in (s.sid, *s.aliases)}
+            | {m.sid for m in MOVED.values() if m.site == site})
+
+
+def service_by_sid(site: str, sid: int) -> Service | None:
+    """Katalogeintrag zu einer eTermin-ID (auch über Aliase); umgezogene → None."""
+    return next((s for s in _SERVICES if s.site == site and sid in (s.sid, *s.aliases)), None)
 
 
 def booking_url(service: Service) -> str:
