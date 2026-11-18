@@ -112,13 +112,24 @@ def test_prune_drops_expired_entries_and_unused_locks(monkeypatch):
     assert set(availability._locks) == {"lang", "neu"}
 
 
-def test_matching_days_without_location_needs_no_requests(monkeypatch):
-    fake = SlowSlots(hamborn_days=[])
-    monkeypatch.setattr(etermin, "slots", fake)
+def test_matching_days_without_location_skips_days_without_slots(monkeypatch):
+    # Die Monatsübersicht meldet D(1) noch als frei, die Tagesabfrage findet dort nichts mehr
+    calls = []
 
-    async def run():
+    async def fake_slots(client, webid, sid, day, params=None):
+        calls.append(day)
+        if day == D(1):
+            return []
+        return [etermin.Slot(datetime(day.year, day.month, day.day, 9), "Bürger-Service-Station-Mitte")]
+
+    monkeypatch.setattr(etermin, "slots", fake_slots)
+
+    async def run(days, limit):
         availability = registry.Availability(client_factory=lambda: None)
-        return await availability.matching_days(SERVICES["personalausweis"], None, [D(1), D(2), D(3)], limit=2)
+        return await availability.matching_days(SERVICES["personalausweis"], None, days, limit=limit)
 
-    assert asyncio.run(run()) == [D(1), D(2)]
-    assert fake.calls == []
+    assert asyncio.run(run([D(1), D(2), D(3)], None)) == [D(2), D(3)]
+
+    calls.clear()
+    assert asyncio.run(run([D(2), D(3), D(4), D(5)], 1)) == [D(2)]
+    assert calls == [D(2)], "passt der erste Tag, reicht eine einzige Tagesabfrage"

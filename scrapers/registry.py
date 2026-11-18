@@ -108,18 +108,25 @@ class Availability:
 
     async def matching_days(self, service: Service, location: str | None, days: list[date],
                             limit: int | None = None) -> list[date]:
-        """Filtert Tage auf den Standort. Ohne Standort unverändert.
-        Mit ``limit`` wird nach so vielen Treffern aufgehört (spart Anfragen)."""
-        if not location:
-            return days[:limit] if limit else days
+        """Tage, an denen es wirklich freie Zeitfenster gibt – mit Standort nur dort.
+
+        Auch ohne Standort wird jeder Tag mit der Tagesabfrage geprüft: Die
+        Monatsübersicht von eTermin kommt aus einem Zwischenspeicher und meldet
+        einen Tag noch eine Weile als frei, nachdem sein letzter Termin vergeben
+        wurde (beobachtet am 18.11.2026). Mit ``limit`` wird nach so vielen
+        Treffern aufgehört; der erste Tag wird dann allein abgefragt, weil er
+        meistens schon passt (eine Anfrage statt MAX_PARALLEL)."""
         result = []
-        # In Blöcken parallel abfragen; nach jedem Block prüfen, ob das Limit erreicht ist
-        for i in range(0, len(days), MAX_PARALLEL):
-            block = days[i:i + MAX_PARALLEL]
+        i = 0
+        while i < len(days):
+            # In Blöcken parallel abfragen; nach jedem Block prüfen, ob das Limit erreicht ist
+            size = 1 if limit and i == 0 else MAX_PARALLEL
+            block = days[i:i + size]
             found = await asyncio.gather(*(self.slots(service, day, location) for day in block))
             result += [day for day, slots in zip(block, found) if slots]
             if limit and len(result) >= limit:
                 return result[:limit]
+            i += size
         return result
 
 

@@ -55,7 +55,9 @@ class FakeAvailability:
 
     def __init__(self, days=None, slots=None, fail=()):
         self.days_by_key = days or {}      # {service_key: [date]}
-        self.slots_by = slots or {}        # {(service_key, date): [Slot]}
+        # {(service_key, date): [Slot]}; ohne Eintrag hat ein Tag ein Zeitfenster um 9 Uhr
+        # in einem Kalender ohne Standort, [] heißt: Tag laut Übersicht frei, aber leer
+        self.slots_by = slots or {}
         self.fail = set(fail)              # service_keys, die einen Fehler werfen
         self.day_calls = []
 
@@ -68,8 +70,12 @@ class FakeAvailability:
         return list(self.days_by_key.get(service.key, []))
 
     async def slots(self, service, day, location=None):
+        from datetime import datetime
+
         from scrapers.catalog import location_for_calendar
-        result = self.slots_by.get((service.key, day), [])
+        from scrapers.etermin import Slot
+        default = [Slot(datetime(day.year, day.month, day.day, 9, 0), "Kalender")]
+        result = self.slots_by.get((service.key, day), default)
         if location:
             result = [s for s in result if location_for_calendar(s.calendar) == location]
         return result

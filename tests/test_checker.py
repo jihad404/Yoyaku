@@ -47,6 +47,18 @@ def test_earliest_notifies_with_times_and_buttons(make_user):
     assert load_state(get_search(sid))["earliest"] == "2026-10-09"
 
 
+def test_phantom_day_from_overview_is_not_reported(make_user):
+    # eTermins Monatsübersicht meldet den 09.10. noch, der letzte Termin ist aber schon weg
+    user = make_user(100)
+    sid = create_search(user['id'], "reisepass", "earliest", state=initial_state("earliest", None, [D(14)], NOW))
+    fake = FakeAvailability(days={"reisepass": [D(9), D(12), D(14)]}, slots={("reisepass", D(9)): []})
+    ctx = FakeContext()
+    run(ctx, fake)
+    text = ctx.bot.sent[0][1]
+    assert "Mo 12.10." in text and "09.10." not in text
+    assert load_state(get_search(sid))["earliest"] == "2026-10-12"
+
+
 def test_each_service_fetched_once_per_round(make_user):
     a, b = make_user(100), make_user(200)
     for u in (a, b):
